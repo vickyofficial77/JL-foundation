@@ -4,7 +4,7 @@ import DonateHeader from "../components/donate/DonateHeader";
 import DonateSectionTitle from "../components/donate/DonateSectionTitle";
 import OptionCard from "../components/donate/OptionCard";
 import AmountCard from "../components/donate/AmountCard";
-import DonateFooter from "../components/donate/DonateFooter";
+import ClubFinderFooter from "../components/club-finder/ClubFinderFooter";
 import RegisterFormPage from "../components/donate/RegisterFormPage";
 import SignInFormPage from "../components/donate/SignInFormPage";
 
@@ -557,7 +557,7 @@ export default function DonatePage() {
         </main>
       )}
 
-      <DonateFooter />
+      <ClubFinderFooter />
     </div>
   );
 }

@@ -32,7 +32,7 @@ export const newsCards = [
   {
     title: "Cleaner water systems beyond traditional access",
     image:
-      "https://images.unsplash.com/photo-1541544181051-e46607f77318?q=80&w=1200&auto=format&fit=crop",
+      "get3.jpg",
   },
 ];
 

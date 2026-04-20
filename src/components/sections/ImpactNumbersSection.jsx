@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Container from "../ui/Container";
 import { impactCards as initialCards } from "../../data/homepageData";
 
 export default function ImpactNumbersSection() {
+  const navigate = useNavigate();
   const [cards, setCards] = useState(initialCards);
   const [isAnimating, setIsAnimating] = useState(false);
   const [direction, setDirection] = useState("next");
@@ -63,6 +65,10 @@ export default function ImpactNumbersSection() {
     };
   };
 
+  const handleExplore = () => {
+    navigate("/club-finder");
+  };
+
   return (
     <section className="bg-[#f5f5f5] py-10 sm:py-14 lg:py-16">
       <Container className="max-w-[1700px] px-0 sm:px-6 lg:px-8">
@@ -74,6 +80,7 @@ export default function ImpactNumbersSection() {
 
         <div className="relative mt-8 sm:mt-10 lg:mt-12">
           <button
+            type="button"
             onClick={rotatePrev}
             disabled={isAnimating}
             className="absolute left-[2%] top-1/2 z-20 hidden -translate-y-1/2 text-slate-500 transition hover:text-slate-800 disabled:opacity-50 lg:block"
@@ -82,6 +89,7 @@ export default function ImpactNumbersSection() {
           </button>
 
           <button
+            type="button"
             onClick={rotateNext}
             disabled={isAnimating}
             className="absolute right-[2%] top-1/2 z-20 hidden -translate-y-1/2 text-slate-500 transition hover:text-slate-800 disabled:opacity-50 lg:block"
@@ -161,12 +169,13 @@ export default function ImpactNumbersSection() {
                         {card.description}
                       </p>
 
-                      <a
-                        href="#"
+                      <button
+                        type="button"
+                        onClick={handleExplore}
                         className="mt-7 inline-block text-[14px] font-extrabold uppercase text-[#009ddb] transition hover:opacity-80 md:text-[15px]"
                       >
                         Explore
-                      </a>
+                      </button>
                     </div>
                   </article>
                 );

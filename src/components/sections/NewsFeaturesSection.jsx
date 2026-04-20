@@ -1,7 +1,10 @@
+import { useNavigate } from "react-router-dom";
 import Container from "../ui/Container";
 import { newsCards } from "../../data/homepageData";
 
 export default function NewsFeaturesSection() {
+  const navigate = useNavigate();
+
   return (
     <section className="bg-[#f5f5f5] py-14 sm:py-16 lg:py-20">
       <Container className="max-w-[1750px] px-4 sm:px-6 lg:px-8">
@@ -44,7 +47,11 @@ export default function NewsFeaturesSection() {
         </div>
 
         <div className="mt-10 flex justify-center lg:mt-12">
-          <button className="inline-flex h-[58px] items-center justify-center rounded-full bg-sky-500 px-10 text-[15px] font-bold uppercase tracking-[0.01em] text-white transition hover:bg-sky-600 sm:px-14 lg:h-[64px] lg:px-16">
+          <button
+            type="button"
+            onClick={() => navigate("/news-features")}
+            className="inline-flex h-[58px] items-center justify-center rounded-full bg-sky-500 px-10 text-[15px] font-bold uppercase tracking-[0.01em] text-white transition hover:bg-sky-600 sm:px-14 lg:h-[64px] lg:px-16"
+          >
             Explore More News and Features
           </button>
         </div>

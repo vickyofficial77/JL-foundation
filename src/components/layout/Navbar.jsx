@@ -102,6 +102,11 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (location.pathname === "/get-involved") {
+      setActiveSection("get-involved");
+      return;
+    }
+
     if (location.pathname !== "/") return;
 
     const onScroll = () => {
@@ -118,6 +123,7 @@ export default function Navbar() {
 
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", onScroll);
   }, [sectionIds, location.pathname]);
 
@@ -144,10 +150,31 @@ export default function Navbar() {
 
   const visibleDesktopDropdown = desktopOpen || hoveredDesktop;
 
+  const goHome = () => {
+    setMobileOpen(false);
+    setDesktopOpen(null);
+    setHoveredDesktop(null);
+    navigate("/");
+  };
+
   const scrollToSection = (id) => {
+    if (location.pathname === "/get-involved" && id === "get-involved") {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+      setActiveSection(id);
+      setMobileOpen(false);
+      setDesktopOpen(null);
+      setHoveredDesktop(null);
+      return;
+    }
+
     if (location.pathname !== "/") {
       navigate("/", { state: { scrollTo: id } });
       setMobileOpen(false);
+      setDesktopOpen(null);
+      setHoveredDesktop(null);
       return;
     }
 
@@ -165,6 +192,8 @@ export default function Navbar() {
 
     setActiveSection(id);
     setMobileOpen(false);
+    setDesktopOpen(null);
+    setHoveredDesktop(null);
   };
 
   const goToDonate = () => {
@@ -174,6 +203,7 @@ export default function Navbar() {
 
   const goToGetInvolved = () => {
     setMobileOpen(false);
+    setActiveSection("get-involved");
     navigate("/get-involved");
   };
 
@@ -209,6 +239,12 @@ export default function Navbar() {
   const handleDesktopLinkClick = (id) => {
     setDesktopOpen(null);
     setHoveredDesktop(null);
+
+    if (id === "get-involved") {
+      goToGetInvolved();
+      return;
+    }
+
     scrollToSection(id);
   };
 
@@ -216,9 +252,23 @@ export default function Navbar() {
     setMobileExpanded((prev) => (prev === id ? null : id));
   };
 
-  const desktopLinkClass = (isOpen) =>
+  const isNavItemActive = (id) => {
+    if (location.pathname === "/get-involved" && id === "get-involved") {
+      return true;
+    }
+
+    if (location.pathname === "/" && activeSection === id) {
+      return true;
+    }
+
+    return false;
+  };
+
+  const desktopLinkClass = (isOpen, isActive) =>
     `group relative flex items-center gap-2 text-[18px] font-normal tracking-[0.005em] transition-colors duration-200 ${
-      isOpen ? "text-sky-600" : "text-slate-600 hover:text-sky-600"
+      isOpen || isActive
+        ? "text-sky-600"
+        : "text-slate-600 hover:text-sky-600"
     }`;
 
   return (
@@ -228,7 +278,7 @@ export default function Navbar() {
           <div className="flex h-[74px] items-center justify-between px-8 xl:px-14">
             <button
               type="button"
-              onClick={() => scrollToSection("about")}
+              onClick={goHome}
               className="flex items-center gap-3"
             >
               <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-amber-500 text-amber-500">
@@ -297,6 +347,7 @@ export default function Navbar() {
             <nav className="flex h-[72px] items-center justify-between px-8 xl:px-14">
               {navItems.map((item) => {
                 const isOpen = visibleDesktopDropdown === item.id;
+                const isActive = isNavItemActive(item.id);
 
                 return (
                   <div
@@ -307,7 +358,7 @@ export default function Navbar() {
                     <button
                       type="button"
                       onClick={() => handleDesktopClick(item.id)}
-                      className={desktopLinkClass(isOpen)}
+                      className={desktopLinkClass(isOpen, isActive)}
                     >
                       <span>{item.label}</span>
                       <ChevronDown
@@ -317,7 +368,9 @@ export default function Navbar() {
                       />
                       <span
                         className={`absolute -bottom-[22px] left-1/2 h-[2px] -translate-x-1/2 bg-sky-600 transition-all duration-300 ${
-                          isOpen ? "w-full" : "w-0 group-hover:w-full"
+                          isOpen || isActive
+                            ? "w-full"
+                            : "w-0 group-hover:w-full"
                         }`}
                       />
                     </button>
@@ -338,6 +391,7 @@ export default function Navbar() {
               <div className="grid grid-cols-6 gap-8 px-8 py-8 xl:px-14">
                 {navItems.map((group) => {
                   const highlighted = visibleDesktopDropdown === group.id;
+                  const isActive = isNavItemActive(group.id);
 
                   return (
                     <div key={group.id}>
@@ -345,24 +399,36 @@ export default function Navbar() {
                         type="button"
                         onClick={() => handleDesktopLinkClick(group.id)}
                         className={`mb-4 inline-flex items-center gap-2 text-left text-[16px] font-semibold transition ${
-                          highlighted
+                          highlighted || isActive
                             ? "text-sky-600"
                             : "text-slate-700 hover:text-sky-600"
                         }`}
                       >
-                        {highlighted && <ChevronRight className="h-4 w-4" />}
+                        {(highlighted || isActive) && (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
                         <span>{group.label}</span>
                       </button>
 
                       <div className="space-y-3">
-                        {group.pages.map((page) => (
-                          <a
+                        {group.pages.map((page, index) => (
+                          <button
                             key={page}
-                            href="#"
-                            className="block text-[14px] leading-6 text-slate-500 transition hover:text-sky-600"
+                            type="button"
+                            onClick={() => {
+                              if (group.id === "get-involved") {
+                                goToGetInvolved();
+                                return;
+                              }
+
+                              if (index === 0) {
+                                handleDesktopLinkClick(group.id);
+                              }
+                            }}
+                            className="block text-left text-[14px] leading-6 text-slate-500 transition hover:text-sky-600"
                           >
                             {page}
-                          </a>
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -387,7 +453,7 @@ export default function Navbar() {
 
           <button
             type="button"
-            onClick={() => scrollToSection("about")}
+            onClick={goHome}
             className="flex flex-1 items-center justify-center gap-2 px-3"
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-amber-500 text-amber-500">
@@ -485,7 +551,7 @@ export default function Navbar() {
               <div className="mx-auto max-w-[260px] space-y-6 text-center">
                 {navItems.map((item) => {
                   const expanded = mobileExpanded === item.id;
-                  const isActive = activeSection === item.id;
+                  const isActive = isNavItemActive(item.id);
 
                   return (
                     <div key={item.id}>
@@ -522,6 +588,11 @@ export default function Navbar() {
                               key={page}
                               type="button"
                               onClick={() => {
+                                if (item.id === "get-involved") {
+                                  goToGetInvolved();
+                                  return;
+                                }
+
                                 if (index === 0) {
                                   scrollToSection(item.id);
                                   setMobileOpen(false);

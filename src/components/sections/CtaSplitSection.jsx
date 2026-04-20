@@ -1,9 +1,13 @@
+import { useNavigate } from "react-router-dom";
 import Container from "../ui/Container";
 
 export default function CtaSplitSection() {
+  const navigate = useNavigate();
+
   return (
     <section className="bg-white py-20 sm:py-24 lg:py-28">
       <div className="grid grid-cols-1 lg:grid-cols-2">
+        
         {/* LEFT SIDE */}
         <div className="flex items-center bg-teal-700 px-6 py-16 sm:px-10 lg:px-16 xl:px-20">
           <div className="max-w-[560px] text-white">
@@ -19,7 +23,11 @@ export default function CtaSplitSection() {
             </p>
 
             <div className="mt-10">
-              <button className="inline-flex h-[54px] items-center justify-center rounded-full border border-white/80 px-10 text-[14px] font-bold uppercase tracking-[0.02em] text-white transition hover:bg-white/10 sm:h-[58px] sm:px-12">
+              <button
+                type="button"
+                onClick={() => navigate("/get-involved")}
+                className="inline-flex h-[54px] items-center justify-center rounded-full border border-white/80 px-10 text-[14px] font-bold uppercase tracking-[0.02em] text-white transition hover:bg-white/10 sm:h-[58px] sm:px-12"
+              >
                 Get Involved
               </button>
             </div>

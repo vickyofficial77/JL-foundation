@@ -1,5 +1,5 @@
 import { useState } from "react";
-import GetInvolvedHeader from "../components/get-involved/GetInvolvedHeader";
+import Navbar from "../components/layout/Navbar";
 import GetInvolvedHero from "../components/get-involved/GetInvolvedHero";
 import GetInvolvedContent from "../components/get-involved/GetInvolvedContent";
 import GetInvolvedFooter from "../components/get-involved/GetInvolvedFooter";
@@ -10,7 +10,7 @@ export default function GetInvolvedPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
-      <GetInvolvedHeader />
+      <Navbar />
 
       {view === "form" ? (
         <SubmitInterestFormPage onBackToLanding={() => setView("landing")} />

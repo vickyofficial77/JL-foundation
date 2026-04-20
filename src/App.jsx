@@ -8,6 +8,7 @@ import PageTransitionLoader from "./components/ui/PageTransitionLoader";
 import TakeActionPage from "./pages/TakeActionPage";
 import ClubFinderPage from "./pages/ClubFinderPage";
 import SearchPage from "./pages/SearchPage";
+import NewsFeaturesPage from "./pages/NewsFeaturesPage";
 
 
 function AppRoutes() {
@@ -41,6 +42,7 @@ function AppRoutes() {
         <Route path="/take-action" element={<TakeActionPage />} />
         <Route path="/club-finder" element={<ClubFinderPage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/news-features" element={<NewsFeaturesPage />} />
 
 
       </Routes>
