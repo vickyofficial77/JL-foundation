@@ -5,6 +5,10 @@ import DonatePage from "./pages/DonatePage";
 import GetInvolvedPage from "./pages/GetInvolvedPage";
 import MyJeanlucPage from "./pages/MyJeanlucPage";
 import PageTransitionLoader from "./components/ui/PageTransitionLoader";
+import TakeActionPage from "./pages/TakeActionPage";
+import ClubFinderPage from "./pages/ClubFinderPage";
+import SearchPage from "./pages/SearchPage";
+
 
 function AppRoutes() {
   const location = useLocation();
@@ -34,6 +38,11 @@ function AppRoutes() {
         <Route path="/donate" element={<DonatePage />} />
         <Route path="/get-involved" element={<GetInvolvedPage />} />
         <Route path="/my-jeanluc" element={<MyJeanlucPage />} />
+        <Route path="/take-action" element={<TakeActionPage />} />
+        <Route path="/club-finder" element={<ClubFinderPage />} />
+        <Route path="/search" element={<SearchPage />} />
+
+
       </Routes>
     </>
   );

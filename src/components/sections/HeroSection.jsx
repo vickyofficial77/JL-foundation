@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Pagination } from "swiper/modules";
+import { useNavigate } from "react-router-dom";
 import Container from "../ui/Container";
 import { heroSlides } from "../../data/homepageData";
 
@@ -9,6 +10,8 @@ import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 
 export default function HeroSection() {
+  const navigate = useNavigate();
+
   return (
     <section className="relative overflow-hidden bg-white">
       <Swiper
@@ -42,16 +45,20 @@ export default function HeroSection() {
                   transition={{ duration: 0.8 }}
                   className="mx-auto max-w-[1100px] px-4 text-center text-white"
                 >
-                  <h1 className="px-2 text-[42px] font-extralight leading-[1.05] tracking-tight sm:text-[58px] lg:text-[82px] xl:text-[88px]">
+                  <h1 className="text-[42px] font-extralight leading-[0.98] tracking-tight sm:text-[58px] lg:text-[82px] xl:text-[88px]">
                     {slide.title}
                   </h1>
 
-                  <p className="mx-auto mt-6 max-w-[980px] px-4 text-[16px] font-normal leading-[1.7] text-white/95 sm:text-[21px] lg:text-[24px]">
+                  <p className="mx-auto mt-6 max-w-[980px] px-2 text-[16px] font-normal leading-[1.7] text-white/95 sm:px-4 sm:text-[21px] lg:px-8 lg:text-[24px]">
                     {slide.description}
                   </p>
 
-                  <div className="mt-10 flex justify-center">
-                    <button className="inline-flex h-[56px] items-center justify-center rounded-full border border-white/80 px-12 py-3 text-[14px] font-bold uppercase tracking-[0.05em] text-white transition-all duration-300 hover:border-white hover:bg-white hover:text-black hover:shadow-[0_10px_30px_rgba(255,255,255,0.25)] sm:h-[60px] sm:px-14 sm:text-[15px]">
+                  <div className="mt-8 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/take-action")}
+                      className="inline-flex h-[56px] items-center justify-center rounded-full border border-white/80 px-12 text-[14px] font-bold uppercase tracking-[0.08em] text-white transition duration-300 hover:bg-white hover:text-slate-900 sm:h-[58px] sm:px-14 sm:text-[15px]"
+                    >
                       {slide.ctaPrimary}
                     </button>
                   </div>
@@ -66,15 +73,12 @@ export default function HeroSection() {
         .hero-swiper .swiper-pagination {
           bottom: 18px;
         }
-
         .hero-swiper .swiper-pagination-bullet {
           width: 8px;
           height: 8px;
-          background: rgba(255, 255, 255, 0.55);
+          background: rgba(255,255,255,0.55);
           opacity: 1;
-          transition: all 0.3s ease;
         }
-
         .hero-swiper .swiper-pagination-bullet-active {
           width: 26px;
           border-radius: 9999px;

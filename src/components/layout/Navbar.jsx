@@ -182,6 +182,16 @@ export default function Navbar() {
     navigate("/my-jeanluc");
   };
 
+  const goToClubFinder = () => {
+    setMobileOpen(false);
+    navigate("/club-finder");
+  };
+
+  const goToSearch = () => {
+    setMobileOpen(false);
+    navigate("/search");
+  };
+
   const handleDesktopHoverEnter = (id) => {
     clearCloseTimer();
     setHoveredDesktop(id);
@@ -246,22 +256,24 @@ export default function Navbar() {
 
               <span className="text-slate-300">|</span>
 
-              <a
-                href="#"
+              <button
+                type="button"
+                onClick={goToClubFinder}
                 className="text-[15px] font-semibold uppercase tracking-[0.01em] text-sky-600 transition-colors duration-200 hover:text-sky-800"
               >
                 Club Finder
-              </a>
+              </button>
 
               <span className="text-slate-300">|</span>
 
-              <a
-                href="#"
+              <button
+                type="button"
+                onClick={goToSearch}
                 className="inline-flex items-center gap-1 text-[15px] font-semibold uppercase tracking-[0.01em] text-sky-600 transition-colors duration-200 hover:text-sky-800"
               >
                 <Search className="h-4 w-4 stroke-[2.4]" />
                 Search
-              </a>
+              </button>
 
               <button
                 type="button"
@@ -394,6 +406,7 @@ export default function Navbar() {
 
           <button
             type="button"
+            onClick={goToSearch}
             className="flex h-full w-[72px] flex-col items-center justify-center border-l border-slate-300 text-sky-500 transition hover:bg-slate-50"
           >
             <Search className="h-5 w-5 stroke-[2.3]" />
@@ -435,12 +448,16 @@ export default function Navbar() {
               </div>
             </div>
 
-            <div className="flex h-full w-[72px] flex-col items-center justify-center border-l border-slate-300 text-sky-500">
+            <button
+              type="button"
+              onClick={goToSearch}
+              className="flex h-full w-[72px] flex-col items-center justify-center border-l border-slate-300 text-sky-500"
+            >
               <Search className="h-5 w-5 stroke-[2.3]" />
               <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.08em]">
                 Search
               </span>
-            </div>
+            </button>
           </div>
 
           <div className="flex h-[calc(100vh-56px)] flex-col overflow-hidden">
@@ -530,12 +547,21 @@ export default function Navbar() {
                     My Jeanluc
                   </button>
 
-                  <a
-                    href="#"
-                    className="mt-4 block text-[13px] font-bold uppercase tracking-[0.03em] text-sky-600 transition hover:text-sky-800"
+                  <button
+                    type="button"
+                    onClick={goToClubFinder}
+                    className="mt-4 block w-full text-[13px] font-bold uppercase tracking-[0.03em] text-sky-600 transition hover:text-sky-800"
                   >
                     Club Finder
-                  </a>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={goToSearch}
+                    className="mt-4 block w-full text-[13px] font-bold uppercase tracking-[0.03em] text-sky-600 transition hover:text-sky-800"
+                  >
+                    Search
+                  </button>
                 </div>
               </div>
             </div>
