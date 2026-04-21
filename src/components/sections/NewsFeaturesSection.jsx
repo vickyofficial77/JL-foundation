@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Container from "../ui/Container";
 import { newsCards } from "../../data/homepageData";
@@ -8,23 +9,34 @@ export default function NewsFeaturesSection() {
   return (
     <section className="bg-[#f5f5f5] py-14 sm:py-16 lg:py-20">
       <Container className="max-w-[1750px] px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6 }}
+          className="text-center"
+        >
           <h2 className="text-[32px] font-light tracking-tight text-slate-700 sm:text-[44px] lg:text-[58px]">
             News &amp; Features
           </h2>
-        </div>
+        </motion.div>
 
         <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3 lg:mt-14 lg:gap-6">
-          {newsCards.map((card) => (
-            <article
-              key={card.title}
+          {newsCards.map((card, index) => (
+            <motion.article
+              key={card.slug}
+              initial={{ opacity: 0, y: 34 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ y: -8 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5, delay: index * 0.08 }}
               className="group relative overflow-hidden bg-slate-200 shadow-sm"
             >
-              <div className="aspect-[1.52/1]">
+              <div className="aspect-[1.52/1] overflow-hidden">
                 <img
                   src={card.image}
                   alt={card.title}
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.06]"
                 />
               </div>
 
@@ -35,18 +47,25 @@ export default function NewsFeaturesSection() {
                   {card.title}
                 </h3>
 
-                <a
-                  href="#"
+                <button
+                  type="button"
+                  onClick={() => navigate(`/news-features/${card.slug}`)}
                   className="mt-3 inline-block text-[16px] font-bold text-white transition hover:opacity-80"
                 >
                   Read more
-                </a>
+                </button>
               </div>
-            </article>
+            </motion.article>
           ))}
         </div>
 
-        <div className="mt-10 flex justify-center lg:mt-12">
+        <motion.div
+          initial={{ opacity: 0, y: 22 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="mt-10 flex justify-center lg:mt-12"
+        >
           <button
             type="button"
             onClick={() => navigate("/news-features")}
@@ -54,7 +73,7 @@ export default function NewsFeaturesSection() {
           >
             Explore More News and Features
           </button>
-        </div>
+        </motion.div>
       </Container>
     </section>
   );

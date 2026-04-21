@@ -1,8 +1,11 @@
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import Container from "../ui/Container";
 import { causes } from "../../data/homepageData";
 
 export default function CausesSection() {
+  const navigate = useNavigate();
+
   return (
     <section className="relative overflow-hidden bg-[#003b73] py-14 text-white sm:py-18 lg:py-24">
       <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(30deg,rgba(255,255,255,0.18)_12%,transparent_12.5%,transparent_87%,rgba(255,255,255,0.18)_87.5%,rgba(255,255,255,0.18)),linear-gradient(150deg,rgba(255,255,255,0.18)_12%,transparent_12.5%,transparent_87%,rgba(255,255,255,0.18)_87.5%,rgba(255,255,255,0.18)),linear-gradient(90deg,rgba(255,255,255,0.12)_2%,transparent_2.5%,transparent_97%,rgba(255,255,255,0.12)_97.5%,rgba(255,255,255,0.12))] [background-size:52px_90px]" />
@@ -11,8 +14,7 @@ export default function CausesSection() {
         <div className="mx-auto max-w-[760px] px-6 text-center">
           <h2 className="text-[30px] font-light leading-[1.25] tracking-tight text-white sm:text-[32px] lg:text-[34px]">
             No challenge is too
-            <br className="sm:hidden" />
-            {" "}big for us
+            <br className="sm:hidden" /> big for us
           </h2>
 
           <p className="mx-auto mt-7 max-w-[300px] text-[15px] font-semibold leading-[1.65] text-white/95 sm:max-w-[700px] sm:text-[12px] sm:leading-[1.9] lg:text-[13px]">
@@ -46,26 +48,30 @@ export default function CausesSection() {
                 : "";
 
             return (
-              <motion.div
-                key={cause.title}
+              <motion.button
+                key={cause.slug}
+                type="button"
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ y: -8, scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
                 viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                className={`text-center ${desktopPosClass} ${mobileSpanClass}`}
+                transition={{ duration: 0.45, delay: index * 0.05 }}
+                onClick={() => navigate(`/causes/${cause.slug}`)}
+                className={`group text-center outline-none ${desktopPosClass} ${mobileSpanClass}`}
               >
-                <div className="mx-auto h-[126px] w-[126px] overflow-hidden rounded-full bg-white sm:h-[170px] sm:w-[170px] lg:h-[190px] lg:w-[190px]">
+                <div className="mx-auto h-[126px] w-[126px] overflow-hidden rounded-full bg-white ring-0 transition duration-300 group-hover:ring-4 group-hover:ring-white/30 sm:h-[170px] sm:w-[170px] lg:h-[190px] lg:w-[190px]">
                   <img
                     src={cause.image}
                     alt={cause.title}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
                   />
                 </div>
 
-                <h3 className="mx-auto mt-5 max-w-[145px] text-[14px] font-extrabold leading-[1.25] tracking-tight text-white sm:max-w-[200px] sm:text-[13px] lg:text-[14px]">
+                <h3 className="mx-auto mt-5 max-w-[145px] text-[14px] font-extrabold leading-[1.25] tracking-tight text-white transition group-hover:text-sky-200 sm:max-w-[200px] sm:text-[13px] lg:text-[14px]">
                   {cause.title}
                 </h3>
-              </motion.div>
+              </motion.button>
             );
           })}
         </div>

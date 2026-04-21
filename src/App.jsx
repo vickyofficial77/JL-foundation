@@ -9,6 +9,9 @@ import TakeActionPage from "./pages/TakeActionPage";
 import ClubFinderPage from "./pages/ClubFinderPage";
 import SearchPage from "./pages/SearchPage";
 import NewsFeaturesPage from "./pages/NewsFeaturesPage";
+import CauseDetailPage from "./pages/CauseDetailPage";
+import NewsFeatureDetailPage from "./pages/NewsFeatureDetailPage";
+
 
 
 function AppRoutes() {
@@ -43,6 +46,9 @@ function AppRoutes() {
         <Route path="/club-finder" element={<ClubFinderPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/news-features" element={<NewsFeaturesPage />} />
+        <Route path="/news-features/:slug" element={<NewsFeatureDetailPage />} />
+        <Route path="/causes/:slug" element={<CauseDetailPage />} />
+        
 
 
       </Routes>
