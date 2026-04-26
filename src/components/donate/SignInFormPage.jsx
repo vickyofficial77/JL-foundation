@@ -1,113 +1,151 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import {
+  CardNumberElement,
+  CardExpiryElement,
+  CardCvcElement,
+  useElements,
+  useStripe,
+} from "@stripe/react-stripe-js";
 
-export default function SignInFormPage() {
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    remember: false,
-  });
-  const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState(false);
+const elementOptions = {
+  style: {
+    base: {
+      fontSize: "18px",
+      color: "#243f57",
+      fontFamily: "Arial, sans-serif",
+      "::placeholder": {
+        color: "#7c8b9a",
+      },
+    },
+    invalid: {
+      color: "#dc2626",
+    },
+  },
+};
 
-  const isValid = useMemo(
-    () => /\S+@\S+\.\S+/.test(form.email) && form.password.trim().length >= 6,
-    [form]
-  );
+export default function StripeCardForm({
+  clientSecret,
+  onPaymentSuccess,
+  onPaymentError,
+}) {
+  const stripe = useStripe();
+  const elements = useElements();
 
-  const validate = () => {
-    const next = {};
-    if (!/\S+@\S+\.\S+/.test(form.email)) next.email = "Enter a valid email.";
-    if (form.password.trim().length < 6) next.password = "Password must be at least 6 characters.";
-    setErrors(next);
-    return Object.keys(next).length === 0;
-  };
+  const [submitting, setSubmitting] = useState(false);
+  const [localError, setLocalError] = useState("");
 
-  const submit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
-    setSubmitted(true);
+
+    if (!stripe || !elements) return;
+
+    setSubmitting(true);
+    setLocalError("");
+
+    const cardNumber = elements.getElement(CardNumberElement);
+
+    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: {
+        card: cardNumber,
+      },
+    });
+
+    if (error) {
+      setLocalError(error.message || "Payment failed.");
+      onPaymentError?.(error.message || "Payment failed.");
+      setSubmitting(false);
+      return;
+    }
+
+    if (paymentIntent?.status === "succeeded") {
+      onPaymentSuccess?.(paymentIntent);
+    } else {
+      onPaymentError?.(`Payment status: ${paymentIntent?.status || "unknown"}`);
+    }
+
+    setSubmitting(false);
   };
 
   return (
-    <main className="flex min-h-[520px] items-center justify-center px-4 py-14">
-      <div className="w-full max-w-[450px] overflow-hidden rounded border border-slate-300 bg-white">
-        <div className="h-[68px] border-b border-slate-300 bg-white" />
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="overflow-hidden border border-slate-400 bg-white">
+        <div className="flex items-center justify-between border-b border-slate-300 px-6 py-6">
+          <h4 className="text-[22px] font-light text-[#243f57]">Card</h4>
 
-        <div className="px-8 py-10">
-          <h2 className="text-center text-[42px] font-light text-[#243f57]">Sign in</h2>
+          <div className="flex items-center gap-3">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg"
+              alt="Visa"
+              className="h-7 w-auto object-contain"
+            />
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+              alt="Mastercard"
+              className="h-7 w-auto object-contain"
+            />
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo.svg"
+              alt="American Express"
+              className="h-7 w-auto object-contain"
+            />
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/5/57/Discover_Card_logo.svg"
+              alt="Discover"
+              className="h-7 w-auto object-contain"
+            />
+          </div>
+        </div>
 
-          {submitted ? (
-            <div className="mt-8 rounded-md border border-emerald-300 bg-emerald-50 px-5 py-4 text-[16px] text-emerald-800">
-              Signed in successfully as <strong>{form.email}</strong>.
-            </div>
-          ) : (
-            <form onSubmit={submit} className="mt-8 space-y-6">
-              <div>
-                <label className="mb-2 block text-[16px] font-semibold text-[#243f57]">
-                  Login email address
-                </label>
-                <input
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => {
-                    setForm((prev) => ({ ...prev, email: e.target.value }));
-                    setErrors((prev) => ({ ...prev, email: undefined }));
-                  }}
-                  className="h-[44px] w-full border border-slate-300 px-4 text-[17px] outline-none transition focus:border-[#0d58ad]"
-                />
-                {errors.email && <p className="mt-2 text-[14px] text-rose-600">{errors.email}</p>}
-              </div>
+        <div className="px-6 py-6">
+          <label className="mb-3 block text-[16px] font-medium text-[#526779]">
+            Card number
+          </label>
+          <div className="h-[56px] border border-slate-500 px-4 py-[15px]">
+            <CardNumberElement options={elementOptions} />
+          </div>
 
-              <div>
-                <label className="mb-2 block text-[16px] font-semibold text-[#243f57]">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={form.password}
-                  onChange={(e) => {
-                    setForm((prev) => ({ ...prev, password: e.target.value }));
-                    setErrors((prev) => ({ ...prev, password: undefined }));
-                  }}
-                  className="h-[44px] w-full border border-slate-300 px-4 text-[17px] outline-none transition focus:border-[#0d58ad]"
-                />
-                {errors.password && (
-                  <p className="mt-2 text-[14px] text-rose-600">{errors.password}</p>
-                )}
-              </div>
-
-              <label className="flex items-center gap-3 text-[16px] text-[#7a8694]">
-                <input
-                  type="checkbox"
-                  checked={form.remember}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, remember: e.target.checked }))
-                  }
-                  className="h-5 w-5 accent-[#0d58ad]"
-                />
-                Remember me
+          <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+            <div>
+              <label className="mb-3 block text-[16px] font-medium text-[#526779]">
+                Expiration date
               </label>
+              <div className="h-[56px] border border-slate-500 px-4 py-[15px]">
+                <CardExpiryElement options={elementOptions} />
+              </div>
+            </div>
 
-              <button
-                type="submit"
-                disabled={!isValid}
-                className={`inline-flex h-[56px] w-full items-center justify-center rounded bg-[#0f7db8] text-[18px] font-semibold text-white transition ${
-                  isValid ? "hover:bg-[#0c699a]" : "cursor-not-allowed opacity-60"
-                }`}
-              >
-                Sign in
-              </button>
+            <div>
+              <label className="mb-3 block text-[16px] font-medium text-[#526779]">
+                Security code
+              </label>
+              <div className="h-[56px] border border-slate-500 px-4 py-[15px]">
+                <CardCvcElement options={elementOptions} />
+              </div>
+            </div>
+          </div>
 
-              <a
-                href="#"
-                className="block text-left text-[16px] text-[#7a8694] transition hover:text-[#0f7db8]"
-              >
-                Need help signing in?
-              </a>
-            </form>
-          )}
+          <div className="mt-6 flex items-center gap-3 text-[16px] text-[#526779]">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-sky-500 text-sky-500">
+              i
+            </span>
+            <span>Note on paying by card</span>
+          </div>
         </div>
       </div>
-    </main>
+
+      {localError ? (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {localError}
+        </div>
+      ) : null}
+
+      <button
+        type="submit"
+        disabled={!stripe || submitting}
+        className="inline-flex h-[56px] min-w-[240px] items-center justify-center bg-[#d10058] px-8 text-[18px] font-bold uppercase tracking-[0.02em] text-white transition hover:bg-[#b1004b] disabled:opacity-60"
+      >
+        {submitting ? "Processing..." : "Submit Card Payment"}
+      </button>
+    </form>
   );
 }

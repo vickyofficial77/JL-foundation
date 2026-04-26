@@ -1,65 +1,107 @@
 import { useState } from "react";
-import { Check, ChevronDown, ChevronUp } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
 
 export default function OptionCard({
   title,
   description,
   selected = false,
-  footer = "Learn more",
   centered = false,
   onSelect,
   compact = false,
+  staticDescription = false,
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const handleCardClick = () => {
+    if (onSelect) onSelect();
+  };
 
   return (
     <div
-      className={`overflow-hidden border transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(0,0,0,0.08)] ${
-        selected
-          ? "border-[#0d58ad] shadow-[0_12px_30px_rgba(13,88,173,0.12)]"
-          : "border-slate-500"
-      } ${centered ? "md:col-span-2 xl:col-span-3 xl:mx-auto xl:w-[34%]" : ""}`}
+      className={[
+        "relative overflow-hidden border border-[#415466] bg-white transition-all duration-300",
+        "hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)]",
+        centered ? "md:col-span-2 xl:col-span-1 xl:mx-auto" : "",
+        compact ? "min-h-[240px]" : "min-h-[290px]",
+        selected ? "bg-[#0057b8] text-white" : "text-[#111827]",
+      ].join(" ")}
     >
-      <button
-        type="button"
-        onClick={onSelect}
-        className={`w-full ${selected ? "bg-[#0d58ad] text-white" : "bg-white text-slate-900"}`}
-      >
-        <div className={`flex flex-col items-center justify-center px-4 ${compact ? "min-h-[200px]" : "min-h-[210px]"}`}>
-          <div
-            className={`mb-6 flex h-8 w-8 items-center justify-center rounded-full border-2 ${
-              selected ? "border-white" : "border-slate-700"
-            }`}
+      {!open ? (
+        <>
+          <button
+            type="button"
+            onClick={handleCardClick}
+            className={[
+              "flex w-full flex-col items-center justify-center px-6 text-center transition",
+              compact ? "min-h-[180px] py-10" : "min-h-[220px] py-12",
+              selected ? "bg-[#0057b8] text-white" : "bg-white text-[#111827]",
+            ].join(" ")}
           >
-            {selected && <Check className="h-5 w-5" />}
-          </div>
+            <div
+              className={[
+                "mb-6 flex h-11 w-11 items-center justify-center rounded-full border-2",
+                selected ? "border-white" : "border-[#415466]",
+              ].join(" ")}
+            >
+              {selected ? <Check className="h-6 w-6" /> : null}
+            </div>
 
-          <div className={`text-center font-bold ${compact ? "text-[20px] sm:text-[22px]" : "text-[21px] sm:text-[24px]"}`}>
-            {title}
-          </div>
+            <h3
+              className={[
+                "font-bold leading-[1.25]",
+                compact ? "text-[20px] sm:text-[22px]" : "text-[20px] sm:text-[22px] lg:text-[24px]",
+              ].join(" ")}
+            >
+              {title}
+            </h3>
+
+            {staticDescription && description ? (
+              <p
+                className={[
+                  "mt-5 max-w-[320px] text-center text-[16px] leading-[1.6]",
+                  selected ? "text-white/90" : "text-[#31465b]",
+                ].join(" ")}
+              >
+                {description}
+              </p>
+            ) : null}
+          </button>
+
+          {!staticDescription && (
+            <div
+              className={[
+                "border-t px-6 py-5 text-center",
+                selected
+                  ? "border-white/15 bg-[#0d4690] text-white"
+                  : "border-slate-200 bg-[#f3f4f6] text-[#1e4f8c]",
+              ].join(" ")}
+            >
+              <button
+                type="button"
+                onClick={() => setOpen(true)}
+                className="inline-flex items-center gap-2 text-[16px] font-medium transition hover:opacity-80"
+              >
+                Learn more
+                <ChevronDown className="h-5 w-5" />
+              </button>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="relative flex min-h-[290px] items-center justify-center bg-white px-8 py-10 text-center text-[#111827]">
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="absolute right-4 top-4 text-[#1e4f8c] transition hover:opacity-70"
+          >
+            <X className="h-6 w-6" />
+          </button>
+
+          <p className="mx-auto max-w-[320px] text-[18px] leading-[1.7] text-[#111827]">
+            {description}
+          </p>
         </div>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => setExpanded((prev) => !prev)}
-        className={`flex w-full items-center justify-center gap-2 border-t px-4 py-3 text-center text-[16px] transition ${
-          selected
-            ? "border-[#184684] bg-[#184684] text-white hover:bg-[#123b72]"
-            : "border-slate-200 bg-[#f2f2f2] text-[#2a4766] hover:bg-[#eaeaea]"
-        }`}
-      >
-        <span>{footer}</span>
-        {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-      </button>
-
-      <div
-        className={`overflow-hidden transition-all duration-300 ${
-          expanded ? "max-h-40 border-t border-slate-200 bg-white opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="px-5 py-4 text-[15px] leading-7 text-[#2f4356]">{description}</div>
-      </div>
+      )}
     </div>
   );
 }

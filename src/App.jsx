@@ -14,6 +14,7 @@ import NewsFeatureDetailPage from "./pages/NewsFeatureDetailPage";
 
 
 
+
 function AppRoutes() {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
@@ -48,7 +49,7 @@ function AppRoutes() {
         <Route path="/news-features" element={<NewsFeaturesPage />} />
         <Route path="/news-features/:slug" element={<NewsFeatureDetailPage />} />
         <Route path="/causes/:slug" element={<CauseDetailPage />} />
-        
+       
 
 
       </Routes>

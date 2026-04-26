@@ -1,90 +1,50 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Menu,
-  Search,
-  HeartHandshake,
-  X,
-  ChevronDown,
-  ChevronRight,
-} from "lucide-react";
+import { Menu, Search, HeartHandshake, X, ChevronRight } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Container from "../ui/Container";
 
 const navItems = [
   {
-    label: "About Jeanluc",
-    id: "about",
-    pages: [
-      "Overview",
-      "History",
-      "Our Structure",
-      "Our Foundation",
-      "Our Leaders",
-      "Membership",
-      "Careers",
-    ],
+    label: "Home",
+    id: "home",
+    path: "/",
+    pages: [],
   },
   {
     label: "Get Involved",
     id: "get-involved",
+    path: "/get-involved",
     pages: [
-      "Overview",
-      "Join a club",
-      "Volunteer Groups",
-      "Youth Clubs",
-      "Community Clubs",
-      "Projects",
-      "Partnerships",
-      "Ways to Give",
+      { label: "Find a Club", path: "/get-involved" },
+      { label: "Submit Interest", path: "/get-involved" },
     ],
   },
   {
-    label: "Our Causes",
+    label: "Take Action",
+    id: "take-action",
+    path: "/take-action",
+    pages: [
+      { label: "Volunteer", path: "/take-action" },
+      { label: "Community Projects", path: "/take-action" },
+    ],
+  },
+  {
+    label: "Causes",
     id: "causes",
+    section: "causes",
     pages: [
-      "Overview",
-      "Promoting Peace",
-      "Fighting Disease",
-      "Providing Clean Water",
-      "Supporting Education",
-      "Growing Local Economies",
-      "Protecting the Environment",
+      { label: "Education", section: "causes" },
+      { label: "Health", section: "causes" },
+      { label: "Community Development", section: "causes" },
     ],
   },
   {
-    label: "Our Programs",
-    id: "programs",
-    pages: [
-      "Overview",
-      "Youth Programs",
-      "Leadership Awards",
-      "Scholarships",
-      "Community Projects",
-      "Grants",
-    ],
-  },
-  {
-    label: "News & Features",
+    label: "News",
     id: "news",
+    section: "news",
     pages: [
-      "All News & Features",
-      "Magazine",
-      "Press Center",
-      "Blog",
-      "Podcast",
-      "Social Media",
-    ],
-  },
-  {
-    label: "For Members",
-    id: "members",
-    pages: [
-      "My Jeanluc",
-      "Club Administration",
-      "Club Finder",
-      "Profile",
-      "Resources",
-      "Foundation",
+      { label: "News & Features", section: "news" },
+      { label: "Impact Stories", section: "impact" },
     ],
   },
 ];
@@ -93,25 +53,30 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopOpen, setDesktopOpen] = useState(null);
   const [hoveredDesktop, setHoveredDesktop] = useState(null);
-  const [mobileExpanded, setMobileExpanded] = useState("get-involved");
-  const [activeSection, setActiveSection] = useState("about");
+  const [mobileExpanded, setMobileExpanded] = useState(null);
+  const [activeSection, setActiveSection] = useState("home");
 
   const closeTimerRef = useRef(null);
-  const sectionIds = useMemo(() => navItems.map((item) => item.id), []);
   const location = useLocation();
   const navigate = useNavigate();
 
+  const sectionIds = useMemo(
+    () => navItems.filter((item) => item.section).map((item) => item.section),
+    []
+  );
+
   useEffect(() => {
-    if (location.pathname === "/get-involved") {
-      setActiveSection("get-involved");
+    const pathMatch = navItems.find((item) => item.path === location.pathname);
+    if (pathMatch) {
+      setActiveSection(pathMatch.id);
       return;
     }
 
     if (location.pathname !== "/") return;
 
     const onScroll = () => {
-      const scrollPosition = window.scrollY + 150;
-      let current = sectionIds[0];
+      const scrollPosition = window.scrollY + 160;
+      let current = "home";
 
       for (const id of sectionIds) {
         const el = document.getElementById(id);
@@ -123,9 +88,8 @@ export default function Navbar() {
 
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-
     return () => window.removeEventListener("scroll", onScroll);
-  }, [sectionIds, location.pathname]);
+  }, [location.pathname, sectionIds]);
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -150,31 +114,46 @@ export default function Navbar() {
 
   const visibleDesktopDropdown = desktopOpen || hoveredDesktop;
 
-  const goHome = () => {
+  const closeMenus = () => {
     setMobileOpen(false);
     setDesktopOpen(null);
     setHoveredDesktop(null);
+  };
+
+  const goHome = () => {
+    closeMenus();
     navigate("/");
   };
 
-  const scrollToSection = (id) => {
-    if (location.pathname === "/get-involved" && id === "get-involved") {
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-      setActiveSection(id);
-      setMobileOpen(false);
-      setDesktopOpen(null);
-      setHoveredDesktop(null);
-      return;
-    }
+  const goToDonate = () => {
+    closeMenus();
+    navigate("/donate");
+  };
 
+  const goToMyJeanluc = () => {
+    closeMenus();
+    navigate("/my-jeanluc");
+  };
+
+  const goToClubFinder = () => {
+    closeMenus();
+    navigate("/club-finder");
+  };
+
+  const goToSearch = () => {
+    closeMenus();
+    navigate("/search");
+  };
+
+  const goToGetInvolved = () => {
+    closeMenus();
+    navigate("/get-involved");
+  };
+
+  const scrollToSection = (id) => {
     if (location.pathname !== "/") {
       navigate("/", { state: { scrollTo: id } });
-      setMobileOpen(false);
-      setDesktopOpen(null);
-      setHoveredDesktop(null);
+      closeMenus();
       return;
     }
 
@@ -185,41 +164,33 @@ export default function Navbar() {
     const top =
       element.getBoundingClientRect().top + window.pageYOffset - navbarOffset;
 
-    window.scrollTo({
-      top,
-      behavior: "smooth",
-    });
-
+    window.scrollTo({ top, behavior: "smooth" });
     setActiveSection(id);
-    setMobileOpen(false);
-    setDesktopOpen(null);
-    setHoveredDesktop(null);
+    closeMenus();
   };
 
-  const goToDonate = () => {
-    setMobileOpen(false);
-    navigate("/donate");
+  const goToItem = (item) => {
+    if (item.path) {
+      closeMenus();
+      navigate(item.path);
+      return;
+    }
+
+    if (item.section) {
+      scrollToSection(item.section);
+    }
   };
 
-  const goToGetInvolved = () => {
-    setMobileOpen(false);
-    setActiveSection("get-involved");
-    navigate("/get-involved");
-  };
+  const goToPage = (page) => {
+    if (page.path) {
+      closeMenus();
+      navigate(page.path);
+      return;
+    }
 
-  const goToMyJeanluc = () => {
-    setMobileOpen(false);
-    navigate("/my-jeanluc");
-  };
-
-  const goToClubFinder = () => {
-    setMobileOpen(false);
-    navigate("/club-finder");
-  };
-
-  const goToSearch = () => {
-    setMobileOpen(false);
-    navigate("/search");
+    if (page.section) {
+      scrollToSection(page.section);
+    }
   };
 
   const handleDesktopHoverEnter = (id) => {
@@ -231,41 +202,30 @@ export default function Navbar() {
     startCloseTimer();
   };
 
-  const handleDesktopClick = (id) => {
-    setHoveredDesktop(null);
-    setDesktopOpen((prev) => (prev === id ? null : id));
-  };
-
-  const handleDesktopLinkClick = (id) => {
+  const handleDesktopClick = (item) => {
     setDesktopOpen(null);
     setHoveredDesktop(null);
+    goToItem(item);
+  };
 
-    if (id === "get-involved") {
-      goToGetInvolved();
+  const toggleMobileGroup = (item) => {
+    if (!item.pages.length) {
+      goToItem(item);
       return;
     }
 
-    scrollToSection(id);
+    setMobileExpanded((prev) => (prev === item.id ? null : item.id));
   };
 
-  const toggleMobileGroup = (id) => {
-    setMobileExpanded((prev) => (prev === id ? null : id));
-  };
-
-  const isNavItemActive = (id) => {
-    if (location.pathname === "/get-involved" && id === "get-involved") {
-      return true;
-    }
-
-    if (location.pathname === "/" && activeSection === id) {
-      return true;
-    }
-
+  const isNavItemActive = (item) => {
+    if (item.path && location.pathname === item.path) return true;
+    if (location.pathname === "/" && activeSection === item.section) return true;
+    if (location.pathname === "/" && item.id === "home" && activeSection === "home") return true;
     return false;
   };
 
   const desktopLinkClass = (isOpen, isActive) =>
-    `group relative flex items-center gap-2 text-[18px] font-normal tracking-[0.005em] transition-colors duration-200 ${
+    `group relative text-[18px] font-normal tracking-[0.005em] transition-colors duration-200 ${
       isOpen || isActive
         ? "text-sky-600"
         : "text-slate-600 hover:text-sky-600"
@@ -276,11 +236,7 @@ export default function Navbar() {
       <Container className="max-w-[1800px] px-0">
         <div className="hidden lg:block">
           <div className="flex h-[74px] items-center justify-between px-8 xl:px-14">
-            <button
-              type="button"
-              onClick={goHome}
-              className="flex items-center gap-3"
-            >
+            <button type="button" onClick={goHome} className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-amber-500 text-amber-500">
                 <HeartHandshake className="h-5 w-5" />
               </div>
@@ -296,47 +252,33 @@ export default function Navbar() {
             </button>
 
             <div className="flex items-center gap-4 xl:gap-5">
-              <button
-                type="button"
-                onClick={goToMyJeanluc}
-                className="text-[15px] font-semibold uppercase tracking-[0.01em] text-sky-600 transition-colors duration-200 hover:text-sky-800"
-              >
+              <button onClick={goToMyJeanluc} className="text-[15px] font-semibold uppercase text-sky-600 hover:text-sky-800">
                 My Jeanluc
               </button>
 
               <span className="text-slate-300">|</span>
 
-              <button
-                type="button"
-                onClick={goToClubFinder}
-                className="text-[15px] font-semibold uppercase tracking-[0.01em] text-sky-600 transition-colors duration-200 hover:text-sky-800"
-              >
+              <button onClick={goToClubFinder} className="text-[15px] font-semibold uppercase text-sky-600 hover:text-sky-800">
                 Club Finder
               </button>
 
               <span className="text-slate-300">|</span>
 
-              <button
-                type="button"
-                onClick={goToSearch}
-                className="inline-flex items-center gap-1 text-[15px] font-semibold uppercase tracking-[0.01em] text-sky-600 transition-colors duration-200 hover:text-sky-800"
-              >
+              <button onClick={goToSearch} className="inline-flex items-center gap-1 text-[15px] font-semibold uppercase text-sky-600 hover:text-sky-800">
                 <Search className="h-4 w-4 stroke-[2.4]" />
                 Search
               </button>
 
               <button
-                type="button"
                 onClick={goToGetInvolved}
-                className="ml-2 inline-flex h-[38px] items-center justify-center rounded-full border border-sky-500 px-9 text-[15px] font-semibold uppercase tracking-[0.01em] text-sky-600 transition-all duration-300 hover:bg-sky-600 hover:text-white"
+                className="ml-2 inline-flex h-[38px] items-center justify-center rounded-full border border-sky-500 px-9 text-[15px] font-semibold uppercase text-sky-600 transition hover:bg-sky-600 hover:text-white"
               >
                 Join a Club
               </button>
 
               <button
-                type="button"
                 onClick={goToDonate}
-                className="inline-flex h-[38px] items-center justify-center rounded-full bg-sky-600 px-10 text-[15px] font-semibold uppercase tracking-[0.01em] text-white shadow-sm transition-all duration-300 hover:border hover:border-sky-600 hover:bg-white hover:text-sky-600"
+                className="inline-flex h-[38px] items-center justify-center rounded-full bg-sky-600 px-10 text-[15px] font-semibold uppercase text-white transition hover:border hover:border-sky-600 hover:bg-white hover:text-sky-600"
               >
                 Donate
               </button>
@@ -344,33 +286,27 @@ export default function Navbar() {
           </div>
 
           <div className="relative" onMouseLeave={handleDesktopHoverLeave}>
-            <nav className="flex h-[72px] items-center justify-between px-8 xl:px-14">
+            <nav className="flex h-[72px] items-center justify-center gap-14 px-8 xl:px-14">
               {navItems.map((item) => {
                 const isOpen = visibleDesktopDropdown === item.id;
-                const isActive = isNavItemActive(item.id);
+                const isActive = isNavItemActive(item);
 
                 return (
                   <div
                     key={item.id}
                     className="relative"
-                    onMouseEnter={() => handleDesktopHoverEnter(item.id)}
+                    onMouseEnter={() => item.pages.length && handleDesktopHoverEnter(item.id)}
                   >
                     <button
                       type="button"
-                      onClick={() => handleDesktopClick(item.id)}
+                      onClick={() => handleDesktopClick(item)}
                       className={desktopLinkClass(isOpen, isActive)}
                     >
                       <span>{item.label}</span>
-                      <ChevronDown
-                        className={`h-4 w-4 transition-transform duration-200 ${
-                          isOpen ? "rotate-180" : ""
-                        }`}
-                      />
+
                       <span
                         className={`absolute -bottom-[22px] left-1/2 h-[2px] -translate-x-1/2 bg-sky-600 transition-all duration-300 ${
-                          isOpen || isActive
-                            ? "w-full"
-                            : "w-0 group-hover:w-full"
+                          isOpen || isActive ? "w-full" : "w-0 group-hover:w-full"
                         }`}
                       />
                     </button>
@@ -384,56 +320,47 @@ export default function Navbar() {
               onMouseLeave={handleDesktopHoverLeave}
               className={`absolute left-0 top-full z-40 w-full overflow-hidden border-t border-slate-300 bg-[#f4f4f4] shadow-[0_12px_35px_rgba(15,23,42,0.08)] transition-all duration-300 ${
                 visibleDesktopDropdown
-                  ? "pointer-events-auto max-h-[500px] opacity-100"
+                  ? "pointer-events-auto max-h-[360px] opacity-100"
                   : "pointer-events-none max-h-0 opacity-0"
               }`}
             >
-              <div className="grid grid-cols-6 gap-8 px-8 py-8 xl:px-14">
-                {navItems.map((group) => {
-                  const highlighted = visibleDesktopDropdown === group.id;
-                  const isActive = isNavItemActive(group.id);
+              <div className="mx-auto grid max-w-[1120px] grid-cols-4 gap-8 px-8 py-8">
+                {navItems
+                  .filter((item) => item.pages.length)
+                  .map((group) => {
+                    const highlighted = visibleDesktopDropdown === group.id;
+                    const isActive = isNavItemActive(group);
 
-                  return (
-                    <div key={group.id}>
-                      <button
-                        type="button"
-                        onClick={() => handleDesktopLinkClick(group.id)}
-                        className={`mb-4 inline-flex items-center gap-2 text-left text-[16px] font-semibold transition ${
-                          highlighted || isActive
-                            ? "text-sky-600"
-                            : "text-slate-700 hover:text-sky-600"
-                        }`}
-                      >
-                        {(highlighted || isActive) && (
+                    return (
+                      <div key={group.id} className={highlighted ? "block" : "hidden"}>
+                        <button
+                          type="button"
+                          onClick={() => goToItem(group)}
+                          className={`mb-4 inline-flex items-center gap-2 text-left text-[17px] font-bold transition ${
+                            highlighted || isActive
+                              ? "text-sky-600"
+                              : "text-slate-700 hover:text-sky-600"
+                          }`}
+                        >
                           <ChevronRight className="h-4 w-4" />
-                        )}
-                        <span>{group.label}</span>
-                      </button>
+                          <span>{group.label}</span>
+                        </button>
 
-                      <div className="space-y-3">
-                        {group.pages.map((page, index) => (
-                          <button
-                            key={page}
-                            type="button"
-                            onClick={() => {
-                              if (group.id === "get-involved") {
-                                goToGetInvolved();
-                                return;
-                              }
-
-                              if (index === 0) {
-                                handleDesktopLinkClick(group.id);
-                              }
-                            }}
-                            className="block text-left text-[14px] leading-6 text-slate-500 transition hover:text-sky-600"
-                          >
-                            {page}
-                          </button>
-                        ))}
+                        <div className="space-y-3">
+                          {group.pages.map((page) => (
+                            <button
+                              key={page.label}
+                              type="button"
+                              onClick={() => goToPage(page)}
+                              className="block text-left text-[15px] leading-6 text-slate-500 transition hover:text-sky-600"
+                            >
+                              {page.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
               </div>
             </div>
           </div>
@@ -443,7 +370,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
-            className="flex h-full w-[72px] flex-col items-center justify-center border-r border-slate-300 text-slate-600 transition hover:bg-slate-50"
+            className="flex h-full w-[72px] flex-col items-center justify-center border-r border-slate-300 text-slate-600"
           >
             <Menu className="h-6 w-6 stroke-[2.1]" />
             <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.08em]">
@@ -451,11 +378,7 @@ export default function Navbar() {
             </span>
           </button>
 
-          <button
-            type="button"
-            onClick={goHome}
-            className="flex flex-1 items-center justify-center gap-2 px-3"
-          >
+          <button type="button" onClick={goHome} className="flex flex-1 items-center justify-center gap-2 px-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-amber-500 text-amber-500">
               <HeartHandshake className="h-4 w-4" />
             </div>
@@ -473,7 +396,7 @@ export default function Navbar() {
           <button
             type="button"
             onClick={goToSearch}
-            className="flex h-full w-[72px] flex-col items-center justify-center border-l border-slate-300 text-sky-500 transition hover:bg-slate-50"
+            className="flex h-full w-[72px] flex-col items-center justify-center border-l border-slate-300 text-sky-500"
           >
             <Search className="h-5 w-5 stroke-[2.3]" />
             <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.08em]">
@@ -499,20 +422,12 @@ export default function Navbar() {
               </span>
             </button>
 
-            <div className="flex flex-1 items-center justify-center gap-2 px-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-amber-500 text-amber-500">
-                <HeartHandshake className="h-4 w-4" />
-              </div>
-
-              <div className="flex flex-col leading-none">
-                <span className="text-[16px] font-bold tracking-tight text-blue-900">
-                  Jeanluc
-                </span>
-                <span className="mt-[2px] text-[13px] font-bold tracking-tight text-blue-900">
-                  Foundation
-                </span>
-              </div>
-            </div>
+            <button type="button" onClick={goHome} className="flex flex-1 items-center justify-center gap-2 px-3">
+              <HeartHandshake className="h-5 w-5 text-amber-500" />
+              <span className="text-[16px] font-bold text-blue-900">
+                Jeanluc Foundation
+              </span>
+            </button>
 
             <button
               type="button"
@@ -527,38 +442,36 @@ export default function Navbar() {
           </div>
 
           <div className="flex h-[calc(100vh-56px)] flex-col overflow-hidden">
-            <div className="shrink-0 px-0">
-              <div className="grid grid-cols-2">
-                <button
-                  type="button"
-                  onClick={goToGetInvolved}
-                  className="inline-flex h-[48px] w-full items-center justify-center border-b border-r border-slate-300 bg-white text-[14px] font-bold uppercase tracking-[0.01em] text-sky-600 transition hover:bg-sky-600 hover:text-white"
-                >
-                  Join a Club
-                </button>
+            <div className="grid grid-cols-2">
+              <button
+                type="button"
+                onClick={goToGetInvolved}
+                className="h-[48px] border-b border-r border-slate-300 bg-white text-[14px] font-bold uppercase text-sky-600 hover:bg-sky-600 hover:text-white"
+              >
+                Join a Club
+              </button>
 
-                <button
-                  type="button"
-                  onClick={goToDonate}
-                  className="inline-flex h-[48px] w-full items-center justify-center border-b border-slate-300 bg-sky-600 text-[14px] font-bold uppercase tracking-[0.01em] text-white transition-all duration-300 hover:bg-white hover:text-sky-600"
-                >
-                  Donate
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={goToDonate}
+                className="h-[48px] border-b border-slate-300 bg-sky-600 text-[14px] font-bold uppercase text-white hover:bg-white hover:text-sky-600"
+              >
+                Donate
+              </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 py-7">
-              <div className="mx-auto max-w-[260px] space-y-6 text-center">
+            <div className="flex-1 overflow-y-auto px-6 py-8">
+              <div className="mx-auto max-w-[280px] space-y-6 text-center">
                 {navItems.map((item) => {
                   const expanded = mobileExpanded === item.id;
-                  const isActive = isNavItemActive(item.id);
+                  const isActive = isNavItemActive(item);
 
                   return (
                     <div key={item.id}>
                       <button
                         type="button"
-                        onClick={() => toggleMobileGroup(item.id)}
-                        className={`mx-auto block text-center text-[18px] font-bold tracking-tight transition ${
+                        onClick={() => toggleMobileGroup(item)}
+                        className={`text-[20px] font-bold transition ${
                           expanded || isActive
                             ? "text-sky-600"
                             : "text-[#5d7287] hover:text-sky-600"
@@ -575,62 +488,40 @@ export default function Navbar() {
                         </span>
                       </button>
 
-                      <div
-                        className={`overflow-hidden transition-all duration-300 ${
-                          expanded
-                            ? "mt-4 max-h-[420px] opacity-100"
-                            : "max-h-0 opacity-0"
-                        }`}
-                      >
-                        <div className="space-y-3">
-                          {item.pages.map((page, index) => (
-                            <button
-                              key={page}
-                              type="button"
-                              onClick={() => {
-                                if (item.id === "get-involved") {
-                                  goToGetInvolved();
-                                  return;
-                                }
-
-                                if (index === 0) {
-                                  scrollToSection(item.id);
-                                  setMobileOpen(false);
-                                }
-                              }}
-                              className="block w-full text-center text-[16px] leading-8 text-[#5d7287] transition hover:text-sky-600"
-                            >
-                              {page}
-                            </button>
-                          ))}
+                      {item.pages.length > 0 && (
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ${
+                            expanded ? "mt-4 max-h-[360px] opacity-100" : "max-h-0 opacity-0"
+                          }`}
+                        >
+                          <div className="space-y-3">
+                            {item.pages.map((page) => (
+                              <button
+                                key={page.label}
+                                type="button"
+                                onClick={() => goToPage(page)}
+                                className="block w-full text-center text-[16px] leading-8 text-[#5d7287] hover:text-sky-600"
+                              >
+                                {page.label}
+                              </button>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   );
                 })}
 
                 <div className="mt-10 border-t border-[#d9dee3] pt-5">
-                  <button
-                    type="button"
-                    onClick={goToMyJeanluc}
-                    className="block w-full text-[13px] font-bold uppercase tracking-[0.03em] text-sky-600 transition hover:text-sky-800"
-                  >
+                  <button onClick={goToMyJeanluc} className="block w-full text-[13px] font-bold uppercase text-sky-600">
                     My Jeanluc
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={goToClubFinder}
-                    className="mt-4 block w-full text-[13px] font-bold uppercase tracking-[0.03em] text-sky-600 transition hover:text-sky-800"
-                  >
+                  <button onClick={goToClubFinder} className="mt-4 block w-full text-[13px] font-bold uppercase text-sky-600">
                     Club Finder
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={goToSearch}
-                    className="mt-4 block w-full text-[13px] font-bold uppercase tracking-[0.03em] text-sky-600 transition hover:text-sky-800"
-                  >
+                  <button onClick={goToSearch} className="mt-4 block w-full text-[13px] font-bold uppercase text-sky-600">
                     Search
                   </button>
                 </div>

@@ -1,4 +1,11 @@
+import { useNavigate } from "react-router-dom";
+
 export default function MyJeanlucHero() {
+  const navigate = useNavigate();
+
+  const goToSignIn = () => navigate("/signin");
+  const goToRegister = () => navigate("/register");
+
   return (
     <section className="relative">
       <div className="relative h-[520px] overflow-hidden sm:h-[620px] lg:h-[680px]">
@@ -21,11 +28,21 @@ export default function MyJeanlucHero() {
               </p>
 
               <div className="mt-10 flex items-center gap-5 text-[18px] font-semibold sm:text-[20px]">
-                <button className="border-b-[3px] border-amber-400 pb-2 text-white">
+                <button
+                  type="button"
+                  onClick={goToSignIn}
+                  className="border-b-[3px] border-amber-400 pb-2 text-white transition hover:border-white hover:text-amber-300"
+                >
                   Sign in
                 </button>
+
                 <span>or</span>
-                <button className="border-b-[3px] border-amber-400 pb-2 text-white">
+
+                <button
+                  type="button"
+                  onClick={goToRegister}
+                  className="border-b-[3px] border-amber-400 pb-2 text-white transition hover:border-white hover:text-amber-300"
+                >
                   Register
                 </button>
               </div>
