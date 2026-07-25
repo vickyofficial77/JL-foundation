@@ -43,8 +43,8 @@ const navItems = [
     id: "news",
     section: "news",
     pages: [
-      { label: "News & Features", section: "news" },
-      { label: "Impact Stories", section: "impact" },
+      { label: "News & Features", path: "/news-features" },
+      { label: "Impact Stories", path: "/impact-stories" },
     ],
   },
 ];
