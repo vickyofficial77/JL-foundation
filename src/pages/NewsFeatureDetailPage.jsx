@@ -1,623 +1,1129 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, useInView } from "framer-motion";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+import {
+  useNavigate,
+  useParams,
+} from "react-router-dom";
+
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  orderBy,
+} from "firebase/firestore";
+
+import { db } from "../firebase/config";
+
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 
-const stories = {
-  "care-close-to-home": {
-    title: "Care close to home",
-    subtitle: "April 2026",
-    author: "Brad Webber",
-    heroTitle: "Care close to home",
-    intro:
-      "Portable kidney failure treatment will help patients stay in the remote communities they love.",
-    sections: [
-      {
-        heading: "Mexico",
-        body:
-          "Within hours of deadly floods and landslides that struck communities, Rotary members were responding. Members helped residents reach safety, cleaned mud-laden streets, and moved house to house to assist families and restore access to daily life.",
-        image:
-          "https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1200&auto=format&fit=crop",
-        imageLeft: false,
-      },
-      {
-        heading: "Canada",
-        body:
-          "Members of a Rotary club in British Columbia created a remembrance project that honored sacrifice and connected the wider community through stories, educational programs, and public participation.",
-        image:
-          "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=1200&auto=format&fit=crop",
-        imageLeft: true,
-      },
-    ],
-    stats: [
-      {
-        value: 100000,
-        prefix: "",
-        suffix: "",
-        label: "Homes damaged by October floods in Mexico",
-      },
-      {
-        value: 75,
-        prefix: "",
-        suffix: "",
-        label: "Countries where Canadians killed in WWI and WWII are buried",
-      },
-    ],
-    ctaTitle:
-      "Rotary projects make a difference in communities around the world.",
-  },
-
-  "rotary-projects-around-the-globe-april-2026": {
-    title: "Rotary projects around the globe",
-    subtitle: "April 2026",
-    author: "Brad Webber",
-    heroTitle: "Rotary projects around the globe",
-    intro:
-      "Snapshots of service from communities where Rotary members are creating practical change.",
-    sections: [
-      {
-        heading: "Mexico",
-        body:
-          "After severe flooding, Rotary members supported families with emergency response, clean-up efforts, and access to safe water and meals.",
-        image:
-          "https://images.unsplash.com/photo-1542810634-71277d95dcbb?q=80&w=1200&auto=format&fit=crop",
-        imageLeft: false,
-      },
-      {
-        heading: "Canada",
-        body:
-          "A remembrance initiative helped honor fallen soldiers while educating students and strengthening civic connection in the community.",
-        image:
-          "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=1200&auto=format&fit=crop",
-        imageLeft: true,
-      },
-      {
-        heading: "Latvia",
-        body:
-          "Volunteers supported a soup kitchen that continues to provide warm meals, tea, and care to guests in need.",
-        image:
-          "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=1200&auto=format&fit=crop",
-        imageLeft: false,
-      },
-      {
-        heading: "India",
-        body:
-          "A local literature festival gave authors, students, and readers a space to celebrate culture, books, and ideas.",
-        image:
-          "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=1200&auto=format&fit=crop",
-        imageLeft: true,
-      },
-    ],
-    stats: [
-      {
-        value: 100000,
-        prefix: "",
-        suffix: "",
-        label: "Homes damaged by October floods in Mexico",
-      },
-      {
-        value: 75,
-        prefix: "",
-        suffix: "",
-        label: "Countries where Canadians killed in WWI and WWII are buried",
-      },
-      {
-        value: 12,
-        prefix: "1 in ",
-        suffix: "",
-        label: "People worldwide who face chronic hunger",
-      },
-      {
-        value: 9,
-        prefix: "$",
-        suffix: " billion",
-        label: "Value of India’s print book market in 2020",
-      },
-    ],
-    ctaTitle:
-      "Rotary projects make a difference in communities around the world.",
-  },
-
-  "to-catch-a-killer-parasite": {
-    title: "To catch a killer parasite",
-    subtitle: "March 2026",
-    author: "Brad Webber",
-    heroTitle: "To catch a killer parasite",
-    intro:
-      "Research, training, and community action are helping tackle one of the world’s toughest public health threats.",
-    sections: [
-      {
-        heading: "Field Research",
-        body:
-          "Researchers and frontline teams are working together to identify outbreaks earlier, strengthen diagnosis, and bring care closer to vulnerable communities.",
-        image:
-          "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200&auto=format&fit=crop",
-        imageLeft: false,
-      },
-      {
-        heading: "Community Response",
-        body:
-          "Local partnerships improve awareness, prevention, and treatment access while supporting long-term health resilience.",
-        image:
-          "https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1200&auto=format&fit=crop",
-        imageLeft: true,
-      },
-    ],
-    stats: [
-      {
-        value: 454,
-        prefix: "$",
-        suffix: "M",
-        label: "in grants supporting disease prevention and response",
-      },
-      {
-        value: 99.9,
-        prefix: "",
-        suffix: "%",
-        label: "Reduction in polio cases since program launch",
-      },
-    ],
-    ctaTitle:
-      "Stronger health systems begin with practical local action.",
-  },
-
-  "discover-science-led-community-breakthroughs": {
-    title: "Discover science-led community breakthroughs",
-    subtitle: "April 2026",
-    author: "Editorial Team",
-    heroTitle: "Discover science-led community breakthroughs",
-    intro:
-      "From research labs to local clinics, science-led community action is helping solve real-world challenges.",
-    sections: [
-      {
-        heading: "Innovation in health",
-        body:
-          "Community partnerships and scientific research are creating better tools, treatments, and systems that improve lives in practical ways.",
-        image:
-          "https://images.unsplash.com/photo-1532187643603-ba119ca4109e?q=80&w=1200&auto=format&fit=crop",
-        imageLeft: false,
-      },
-      {
-        heading: "Local breakthroughs",
-        body:
-          "When experts, volunteers, and community leaders collaborate, breakthroughs become more accessible and more sustainable.",
-        image:
-          "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200&auto=format&fit=crop",
-        imageLeft: true,
-      },
-    ],
-    stats: [
-      {
-        value: 320,
-        prefix: "",
-        suffix: "+",
-        label: "community-led health innovations supported",
-      },
-      {
-        value: 84,
-        prefix: "",
-        suffix: "%",
-        label: "improvement in project access and delivery",
-      },
-    ],
-    ctaTitle:
-      "Science and service together can create lasting community change.",
-  },
-
-  "global-volunteers-transforming-local-lives": {
-    title: "Global volunteers transforming local lives",
-    subtitle: "April 2026",
-    author: "Editorial Team",
-    heroTitle: "Global volunteers transforming local lives",
-    intro:
-      "Dedicated volunteers are helping communities respond to urgent needs and build stronger futures.",
-    sections: [
-      {
-        heading: "Community service in action",
-        body:
-          "Volunteers bring energy, compassion, and practical support to projects focused on health, dignity, education, and opportunity.",
-        image:
-          "https://images.unsplash.com/photo-1559027615-cd4628902d4a?q=80&w=1200&auto=format&fit=crop",
-        imageLeft: false,
-      },
-      {
-        heading: "Lasting local impact",
-        body:
-          "When local communities and global volunteers work together, projects can respond faster and reach more people effectively.",
-        image:
-          "https://images.unsplash.com/photo-1542810634-71277d95dcbb?q=80&w=1200&auto=format&fit=crop",
-        imageLeft: true,
-      },
-    ],
-    stats: [
-      {
-        value: 5000,
-        prefix: "",
-        suffix: "+",
-        label: "volunteer hours mobilized across communities",
-      },
-      {
-        value: 60,
-        prefix: "",
-        suffix: "+",
-        label: "local initiatives strengthened",
-      },
-    ],
-    ctaTitle:
-      "Volunteer action creates visible impact where communities need it most.",
-  },
-
-  "cleaner-water-systems-beyond-traditional-access": {
-    title: "Cleaner water systems beyond traditional access",
-    subtitle: "April 2026",
-    author: "Editorial Team",
-    heroTitle: "Cleaner water systems beyond traditional access",
-    intro:
-      "Smarter and cleaner water systems are helping communities move beyond traditional limits of access.",
-    sections: [
-      {
-        heading: "Modern water access",
-        body:
-          "Improved water systems are helping families, schools, and clinics get more reliable access to safe water.",
-        image: "get3.jpg",
-        imageLeft: false,
-      },
-      {
-        heading: "Sustainable local systems",
-        body:
-          "By combining infrastructure, education, and local ownership, communities can maintain cleaner water systems over the long term.",
-        image:
-          "https://images.unsplash.com/photo-1509316785289-025f5b846b35?q=80&w=1200&auto=format&fit=crop",
-        imageLeft: true,
-      },
-    ],
-    stats: [
-      {
-        value: 240,
-        prefix: "",
-        suffix: "+",
-        label: "clean water systems improved",
-      },
-      {
-        value: 91,
-        prefix: "",
-        suffix: "%",
-        label: "households reporting improved access",
-      },
-    ],
-    ctaTitle:
-      "Better water systems mean healthier and more resilient communities.",
-  },
-};
-
-const storyAliases = {
-  "global-volunteers-transforming-local-lives": "global-volunteers-transforming-local-lives",
-  "discover-science-led-community-breakthroughs":
-    "discover-science-led-community-breakthroughs",
-  "cleaner-water-systems-beyond-traditional-access":
-    "cleaner-water-systems-beyond-traditional-access",
-};
-
-function CountUp({ value, prefix = "", suffix = "", label }) {
-  const ref = useRef(null);
-  const inView = useInView(ref, { once: true, amount: 0.45 });
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!inView) return;
-
-    const duration = 1700;
-    const startTime = performance.now();
-    let frameId;
-
-    const animate = (time) => {
-      const progress = Math.min((time - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const current = value * eased;
-      setCount(Number(current.toFixed(value % 1 !== 0 ? 1 : 0)));
-
-      if (progress < 1) {
-        frameId = requestAnimationFrame(animate);
-      }
-    };
-
-    frameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frameId);
-  }, [inView, value]);
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 26 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.35 }}
-      transition={{ duration: 0.55 }}
-      className="px-4 py-10 text-center"
-    >
-      <div className="text-[58px] font-light leading-none text-[#0a57a8] sm:text-[88px]">
-        {prefix}
-        {count}
-        {suffix}
-      </div>
-      <p className="mx-auto mt-8 max-w-[380px] text-[20px] leading-[1.5] text-[#0a57a8]">
-        {label}
-      </p>
-    </motion.div>
-  );
-}
-
-function HelpfulSection() {
-  const [state, setState] = useState("idle");
-  const [text, setText] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleYes = () => {
-    setState("yes");
-    setSubmitted(true);
-  };
-
-  const handleNo = () => {
-    setState("no");
-    setSubmitted(false);
-  };
-
-  const submitFeedback = (e) => {
-    e.preventDefault();
-    if (!text.trim()) return;
-    setSubmitted(true);
-    setText("");
-  };
-
-  return (
-    <section className="bg-[#f3f3f3] py-8">
-      <div className="mx-auto max-w-[1880px] px-6">
-        <div className="rounded-sm bg-[#f0f0f0] px-6 py-9">
-          {state !== "no" && !submitted && (
-            <div className="flex flex-col items-center justify-center gap-6 text-center lg:flex-row lg:gap-10">
-              <p className="text-[18px] text-[#667789]">
-                Please help us improve. Was this page helpful?
-              </p>
-
-              <div className="flex flex-wrap items-center justify-center gap-6">
-                <button
-                  type="button"
-                  onClick={handleYes}
-                  className="inline-flex min-w-[170px] justify-center rounded-full bg-white px-10 py-4 text-[18px] font-bold text-[#5d7287] transition hover:bg-slate-50"
-                >
-                  YES
-                </button>
-                <button
-                  type="button"
-                  onClick={handleNo}
-                  className="inline-flex min-w-[170px] justify-center rounded-full bg-white px-10 py-4 text-[18px] font-bold text-[#5d7287] transition hover:bg-slate-50"
-                >
-                  NO
-                </button>
-              </div>
-            </div>
-          )}
-
-          {submitted && state === "yes" && (
-            <div className="py-6 text-center">
-              <h3 className="text-[28px] font-bold text-[#5d7287]">
-                Thank you for your feedback!
-              </h3>
-            </div>
-          )}
-
-          {state === "no" && !submitted && (
-            <form onSubmit={submitFeedback}>
-              <h3 className="text-center text-[20px] font-bold text-[#5d7287]">
-                What can we do to improve this information?
-              </h3>
-
-              <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                className="mt-6 min-h-[250px] w-full resize-y border border-[#b8c4cf] bg-white px-4 py-4 text-[18px] text-[#243f57] outline-none transition focus:border-[#159dc5]"
-              />
-
-              <p className="mt-8 text-center text-[16px] text-[#667789]">
-                To protect your privacy, do not include contact information in your feedback.
-              </p>
-
-              <div className="mt-8 flex justify-center">
-                <button
-                  type="submit"
-                  className="inline-flex min-w-[350px] items-center justify-center rounded-full bg-[#159dc5] px-10 py-5 text-[20px] font-bold uppercase text-white transition hover:bg-[#118ab0]"
-                >
-                  Submit Feedback
-                </button>
-              </div>
-            </form>
-          )}
-
-          {submitted && state === "no" && (
-            <div className="py-6 text-center">
-              <h3 className="text-[28px] font-bold text-[#5d7287]">
-                Thank you for your feedback!
-              </h3>
-            </div>
-          )}
-        </div>
-      </div>
-    </section>
-  );
-}
+import {
+  ArrowLeft,
+  ArrowRight,
+  Calendar,
+  User,
+  Clock,
+  Share2,
+  Tag,
+  AlertCircle,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  Images,
+} from "lucide-react";
 
 export default function NewsFeatureDetailPage() {
-  const { slug } = useParams();
+  const { id } = useParams();
 
-  const resolvedSlug = storyAliases[slug] || slug;
-  const story = useMemo(() => stories[resolvedSlug], [resolvedSlug]);
+  const navigate = useNavigate();
+
+  // ============================================
+  // STATE
+  // ============================================
+
+  const [story, setStory] =
+    useState(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+  /*
+  RELATED STORIES
+  */
+
+  const [relatedStories, setRelatedStories] =
+    useState([]);
+
+  const [relatedLoading, setRelatedLoading] =
+    useState(true);
+
+  /*
+  GALLERY
+  */
+
+  const [activeGalleryIndex, setActiveGalleryIndex] =
+    useState(0);
+
+  // ============================================
+  // FETCH ARTICLE
+  // ============================================
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [resolvedSlug]);
+    let isMounted = true;
 
-  if (!story) {
+    async function fetchStory() {
+      if (!id) {
+        setError(
+          "No news article ID was provided."
+        );
+
+        setLoading(false);
+
+        return;
+      }
+
+      try {
+        setLoading(true);
+
+        setError("");
+
+        setStory(null);
+
+        setActiveGalleryIndex(0);
+
+        const storyRef = doc(
+          db,
+          "news_stories",
+          id
+        );
+
+        const snapshot =
+          await getDoc(storyRef);
+
+        if (!snapshot.exists()) {
+          if (isMounted) {
+            setStory(null);
+
+            setError(
+              "The requested news article could not be found."
+            );
+          }
+
+          return;
+        }
+
+        if (isMounted) {
+          setStory({
+            id: snapshot.id,
+            ...snapshot.data(),
+          });
+        }
+      } catch (err) {
+        console.error(
+          "Error loading news article:",
+          err
+        );
+
+        if (isMounted) {
+          setError(
+            err.message ||
+              "Unable to load this article. Please try again."
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchStory();
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  // ============================================
+  // FETCH RELATED STORIES
+  // ============================================
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchRelatedStories() {
+      try {
+        setRelatedLoading(true);
+
+        const storiesQuery =
+          query(
+            collection(
+              db,
+              "news_stories"
+            ),
+            orderBy(
+              "timestamp",
+              "desc"
+            )
+          );
+
+        const snapshot =
+          await getDocs(
+            storiesQuery
+          );
+
+        const stories =
+          snapshot.docs
+            .map(
+              (storyDoc) => ({
+                id: storyDoc.id,
+                ...storyDoc.data(),
+              })
+            )
+            .filter(
+              (item) =>
+                item.id !== id
+            );
+
+        if (isMounted) {
+          setRelatedStories(
+            stories.slice(0, 6)
+          );
+        }
+      } catch (err) {
+        console.error(
+          "Error loading related stories:",
+          err
+        );
+
+        if (isMounted) {
+          setRelatedStories([]);
+        }
+      } finally {
+        if (isMounted) {
+          setRelatedLoading(false);
+        }
+      }
+    }
+
+    fetchRelatedStories();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  // ============================================
+  // FORMAT DATE
+  // ============================================
+
+  const formatDate = () => {
+    if (!story) {
+      return "No date";
+    }
+
+    if (story.timestamp?.toDate) {
+      return story.timestamp
+        .toDate()
+        .toLocaleDateString(
+          "en-US",
+          {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }
+        );
+    }
+
+    if (story.date) {
+      return story.date;
+    }
+
+    return "No date";
+  };
+
+  // ============================================
+  // READING TIME
+  // ============================================
+
+  const getReadingTime = () => {
+    const article =
+      story?.detailArticle ||
+      story?.description ||
+      "";
+
+    const words =
+      article
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .length;
+
+    const minutes =
+      Math.max(
+        1,
+        Math.ceil(words / 200)
+      );
+
+    return `${minutes} min read`;
+  };
+
+  // ============================================
+  // SHARE
+  // ============================================
+
+  const handleShare = async () => {
+    try {
+      if (
+        navigator.share
+      ) {
+        await navigator.share({
+          title:
+            story?.title ||
+            "News Article",
+
+          text:
+            story?.shortArticle ||
+            "",
+
+          url:
+            window.location.href,
+        });
+
+        return;
+      }
+
+      await navigator.clipboard.writeText(
+        window.location.href
+      );
+
+      alert(
+        "Article link copied to clipboard."
+      );
+    } catch (err) {
+      console.error(
+        "Share failed:",
+        err
+      );
+    }
+  };
+
+  // ============================================
+  // GALLERY DATA
+  // ============================================
+
+  const galleryImages =
+    Array.isArray(
+      story?.gallery
+    )
+      ? story.gallery.filter(
+          Boolean
+        )
+      : [];
+
+  // ============================================
+  // GALLERY NEXT
+  // ============================================
+
+  const nextGalleryImage = () => {
+    if (
+      galleryImages.length <= 1
+    ) {
+      return;
+    }
+
+    setActiveGalleryIndex(
+      (current) =>
+        (current + 1) %
+        galleryImages.length
+    );
+  };
+
+  // ============================================
+  // GALLERY PREVIOUS
+  // ============================================
+
+  const previousGalleryImage = () => {
+    if (
+      galleryImages.length <= 1
+    ) {
+      return;
+    }
+
+    setActiveGalleryIndex(
+      (current) =>
+        current === 0
+          ? galleryImages.length - 1
+          : current - 1
+    );
+  };
+
+  // ============================================
+  // OPEN RELATED STORY
+  // ============================================
+
+  const openRelatedStory = (
+    storyId
+  ) => {
+    if (!storyId) {
+      return;
+    }
+
+    navigate(
+      `/news/${storyId}`
+    );
+  };
+
+  // ============================================
+  // LOADING
+  // ============================================
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
+      <div className="min-h-screen bg-white">
         <Navbar />
-        <main className="mx-auto max-w-[1200px] px-4 py-24">
-          <h1 className="text-[42px] font-light text-[#243f57]">
-            Story not found
-          </h1>
+
+        <main className="pt-32 pb-24">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 animate-pulse">
+
+            <div className="h-4 w-32 bg-slate-200 rounded mb-8" />
+
+            <div className="max-w-4xl">
+
+              <div className="h-5 w-24 bg-slate-200 rounded mb-5" />
+
+              <div className="h-14 bg-slate-200 rounded w-full mb-4" />
+
+              <div className="h-14 bg-slate-200 rounded w-4/5 mb-8" />
+
+            </div>
+
+            <div className="flex gap-6 mb-10">
+
+              <div className="h-5 w-32 bg-slate-200 rounded" />
+
+              <div className="h-5 w-32 bg-slate-200 rounded" />
+
+            </div>
+
+            <div className="aspect-[16/8] bg-slate-200 rounded-3xl mb-12" />
+
+            <div className="max-w-3xl mx-auto space-y-4">
+
+              <div className="h-5 bg-slate-200 rounded" />
+
+              <div className="h-5 bg-slate-200 rounded" />
+
+              <div className="h-5 bg-slate-200 rounded w-5/6" />
+
+            </div>
+
+          </div>
         </main>
+
         <Footer />
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
-      <Navbar />
+  // ============================================
+  // ERROR
+  // ============================================
 
-      <main>
-        <section className="bg-[#f5f5f5] py-16 sm:py-20">
-          <div className="mx-auto max-w-[1280px] px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 34 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.65 }}
-              className="text-center"
-            >
-              <h1 className="mx-auto max-w-[1100px] text-[52px] font-light leading-[1.05] tracking-tight text-[#3a434d] sm:text-[84px] lg:text-[98px]">
-                {story.heroTitle}
-              </h1>
+  if (
+    error ||
+    !story
+  ) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        <Navbar />
 
-              <div className="mt-10 text-[22px] font-bold text-[#243f57] sm:text-[40px]">
-                {story.subtitle}
-              </div>
-            </motion.div>
+        <main className="flex-1 flex items-center justify-center px-4 pt-24">
 
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.12, duration: 0.55 }}
-              className="mx-auto mt-10 max-w-[1000px]"
-            >
-              <div className="text-[20px] text-[#243f57]">
-                By <span className="font-bold">{story.author}</span>
-              </div>
-              <div className="mt-8 h-px w-[70px] bg-slate-300" />
-            </motion.div>
+          <div className="max-w-lg text-center">
 
-            <motion.p
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.18, duration: 0.55 }}
-              className="mx-auto mt-10 max-w-[1000px] text-[22px] leading-[1.8] text-[#243f57]"
-            >
-              {story.intro}
-            </motion.p>
-          </div>
-        </section>
+            <div className="w-16 h-16 mx-auto rounded-full bg-rose-50 flex items-center justify-center mb-5">
 
-        <section className="bg-[#f5f5f5] py-6">
-          <div className="mx-auto max-w-[1540px] px-4">
-            <div className="space-y-20">
-              {story.sections.map((section, index) => (
-                <motion.div
-                  key={section.heading}
-                  initial={{ opacity: 0, y: 38 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.18 }}
-                  transition={{ duration: 0.6, delay: index * 0.05 }}
-                  className="grid grid-cols-1 items-start gap-10 lg:grid-cols-2"
-                >
-                  {section.imageLeft && (
-                    <div className="order-2 lg:order-1">
-                      <img
-                        src={section.image}
-                        alt={section.heading}
-                        className="h-[380px] w-full object-cover"
-                      />
-                    </div>
-                  )}
+              <AlertCircle className="w-8 h-8 text-rose-500" />
 
-                  <div className={section.imageLeft ? "order-1 lg:order-2" : "order-1"}>
-                    <h2 className="text-[32px] font-bold text-[#243f57]">
-                      {section.heading}
-                    </h2>
-                    <p className="mt-6 text-[22px] leading-[1.85] text-[#243f57]">
-                      {section.body}
-                    </p>
-                  </div>
-
-                  {!section.imageLeft && (
-                    <div className="order-2">
-                      <img
-                        src={section.image}
-                        alt={section.heading}
-                        className="h-[380px] w-full object-cover"
-                      />
-                    </div>
-                  )}
-                </motion.div>
-              ))}
             </div>
-          </div>
-        </section>
 
-        <section
-          className="bg-[#f5f5f5] py-16"
-          style={{
-            backgroundImage:
-              "radial-gradient(rgba(0,0,0,0.03) 1px, transparent 1px)",
-            backgroundSize: "14px 14px",
-          }}
-        >
-          <div className="mx-auto max-w-[1500px] px-4">
-            <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
-              {story.stats.map((stat) => (
-                <CountUp
-                  key={stat.label}
-                  value={stat.value}
-                  prefix={stat.prefix}
-                  suffix={stat.suffix}
-                  label={stat.label}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
+            <h1 className="text-2xl font-bold text-[#243f57]">
 
-        <section className="relative overflow-hidden bg-[#003b73] py-20 text-white">
-          <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(30deg,rgba(255,255,255,0.18)_12%,transparent_12.5%,transparent_87%,rgba(255,255,255,0.18)_87.5%,rgba(255,255,255,0.18)),linear-gradient(150deg,rgba(255,255,255,0.18)_12%,transparent_12.5%,transparent_87%,rgba(255,255,255,0.18)_87.5%,rgba(255,255,255,0.18))] [background-size:52px_90px]" />
-          <div className="relative z-10 mx-auto max-w-[1300px] px-4 text-center">
-            <motion.h3
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="mx-auto max-w-[920px] text-[36px] font-bold leading-[1.5] text-white sm:text-[48px]"
-            >
-              {story.ctaTitle}
-            </motion.h3>
+              {error?.includes(
+                "not be found"
+              )
+                ? "Article Not Found"
+                : "Unable to Load Article"}
 
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.12 }}
-              className="mt-12"
-            >
+            </h1>
+
+            <p className="mt-3 text-slate-500 leading-7">
+
+              {error ||
+                "The requested news article does not exist or may have been removed."}
+
+            </p>
+
+            <div className="mt-7 flex flex-wrap justify-center gap-3">
+
               <button
                 type="button"
-                onClick={() => window.location.assign("/news-features")}
-                className="inline-flex min-w-[350px] items-center justify-center rounded-full bg-white px-12 py-5 text-[22px] font-bold uppercase text-[#61778b] transition hover:bg-slate-100"
+                onClick={() =>
+                  navigate(
+                    "/news-features"
+                  )
+                }
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#0d58ad] text-white font-bold text-sm hover:bg-[#0b4c96] transition"
               >
-                Learn More
+
+                <ArrowLeft className="w-4 h-4" />
+
+                Back to News
+
               </button>
-            </motion.div>
+
+              {error &&
+                !error.includes(
+                  "not be found"
+                ) && (
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      window.location.reload()
+                    }
+                    className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-sm hover:bg-slate-50 transition"
+                  >
+
+                    <RefreshCw className="w-4 h-4" />
+
+                    Try Again
+
+                  </button>
+
+                )}
+
+            </div>
+
           </div>
+
+        </main>
+
+        <Footer />
+      </div>
+    );
+  }
+
+  // ============================================
+  // ARTICLE PAGE
+  // ============================================
+
+  return (
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col">
+
+      <Navbar />
+
+      <main className="flex-1 pt-28 pb-24">
+
+        {/* ============================================
+            ARTICLE HEADER
+        ============================================ */}
+
+        <header className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+          {/* BACK */}
+
+          <button
+            type="button"
+            onClick={() =>
+              navigate(
+                "/news-features"
+              )
+            }
+            className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-[#0d58ad] transition"
+          >
+
+            <ArrowLeft className="w-4 h-4" />
+
+            Back to News & Features
+
+          </button>
+
+          <div className="mt-10 max-w-4xl">
+
+            {/* CATEGORY */}
+
+            <span className="inline-block text-xs font-black uppercase tracking-[0.2em] text-[#0d58ad]">
+
+              {story.category ||
+                story.label ||
+                "News"}
+
+            </span>
+
+            {/* TITLE */}
+
+            <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] text-[#243f57]">
+
+              {story.title}
+
+            </h1>
+
+            {/* SHORT ARTICLE */}
+
+            {story.shortArticle && (
+
+              <p className="mt-7 text-lg sm:text-xl text-slate-600 leading-8 max-w-3xl">
+
+                {story.shortArticle}
+
+              </p>
+
+            )}
+
+            {/* META */}
+
+            <div className="mt-8 pt-6 border-t border-slate-200 flex flex-wrap items-center gap-x-7 gap-y-4 text-sm text-slate-500">
+
+              <span className="inline-flex items-center gap-2">
+
+                <User className="w-4 h-4 text-[#0d58ad]" />
+
+                {story.author ||
+                  "Admin"}
+
+              </span>
+
+              <span className="inline-flex items-center gap-2">
+
+                <Calendar className="w-4 h-4 text-[#0d58ad]" />
+
+                {formatDate()}
+
+              </span>
+
+              <span className="inline-flex items-center gap-2">
+
+                <Clock className="w-4 h-4 text-[#0d58ad]" />
+
+                {getReadingTime()}
+
+              </span>
+
+            </div>
+
+          </div>
+
+          {/* FEATURE IMAGE */}
+
+          {story.image && (
+
+            <figure className="mt-12">
+
+              <div className="overflow-hidden rounded-2xl sm:rounded-3xl bg-slate-100">
+
+                <img
+                  src={
+                    story.image
+                  }
+                  alt={
+                    story.title ||
+                    "News article"
+                  }
+                  className="block w-full h-auto max-h-[760px] object-contain mx-auto"
+                />
+
+              </div>
+
+            </figure>
+
+          )}
+
+        </header>
+
+        {/* ============================================
+            ARTICLE CONTENT
+        ============================================ */}
+
+        <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-14">
+
+          <div className="text-[17px] sm:text-[18px] leading-[1.9] text-slate-700 whitespace-pre-line">
+
+            {story.detailArticle ||
+              story.description ||
+              "No detailed article content is available."}
+
+          </div>
+
+          {/* ============================================
+              PHOTO GALLERY
+          ============================================ */}
+
+          {galleryImages.length >
+            0 && (
+
+            <section className="mt-16 pt-12 border-t border-slate-200">
+
+              <div className="flex items-center justify-between gap-4 mb-7">
+
+                <div>
+
+                  <div className="flex items-center gap-2">
+
+                    <Images className="w-5 h-5 text-[#0d58ad]" />
+
+                    <h2 className="text-2xl sm:text-3xl font-black text-[#243f57]">
+                      Photo Gallery
+                    </h2>
+
+                  </div>
+
+                  <p className="mt-2 text-sm text-slate-500">
+                    Photos from this story
+                  </p>
+
+                </div>
+
+                <span className="text-sm font-semibold text-slate-500 whitespace-nowrap">
+                  {activeGalleryIndex +
+                    1}{" "}
+                  /{" "}
+                  {
+                    galleryImages.length
+                  }
+                </span>
+
+              </div>
+
+              {/* MAIN GALLERY */}
+
+              <div className="relative group">
+
+                <div className="relative aspect-[16/10] sm:aspect-[16/9] overflow-hidden rounded-2xl bg-slate-100">
+
+                  <img
+                    src={
+                      galleryImages[
+                        activeGalleryIndex
+                      ]
+                    }
+                    alt={`${story.title} gallery photo ${
+                      activeGalleryIndex +
+                      1
+                    }`}
+                    className="w-full h-full object-cover transition-opacity duration-300"
+                  />
+
+                  {/* PREVIOUS */}
+
+                  {galleryImages.length >
+                    1 && (
+
+                    <button
+                      type="button"
+                      onClick={
+                        previousGalleryImage
+                      }
+                      aria-label="Previous gallery image"
+                      className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 backdrop-blur-sm text-[#243f57] flex items-center justify-center shadow-lg hover:bg-white hover:scale-105 transition"
+                    >
+
+                      <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+
+                    </button>
+
+                  )}
+
+                  {/* NEXT */}
+
+                  {galleryImages.length >
+                    1 && (
+
+                    <button
+                      type="button"
+                      onClick={
+                        nextGalleryImage
+                      }
+                      aria-label="Next gallery image"
+                      className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 backdrop-blur-sm text-[#243f57] flex items-center justify-center shadow-lg hover:bg-white hover:scale-105 transition"
+                    >
+
+                      <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+
+                    </button>
+
+                  )}
+
+                </div>
+
+              </div>
+
+              {/* THUMBNAILS */}
+
+              {galleryImages.length >
+                1 && (
+
+                <div className="mt-5 flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+
+                  {galleryImages.map(
+                    (
+                      image,
+                      index
+                    ) => (
+
+                      <button
+                        key={`${image}-${index}`}
+                        type="button"
+                        onClick={() =>
+                          setActiveGalleryIndex(
+                            index
+                          )
+                        }
+                        className={`flex-none w-20 h-16 sm:w-24 sm:h-20 overflow-hidden rounded-xl transition-all ${
+                          activeGalleryIndex ===
+                          index
+                            ? "ring-2 ring-[#0d58ad] ring-offset-2"
+                            : "opacity-60 hover:opacity-100"
+                        }`}
+                      >
+
+                        <img
+                          src={
+                            image
+                          }
+                          alt={`Thumbnail ${
+                            index +
+                            1
+                          }`}
+                          className="w-full h-full object-cover"
+                        />
+
+                      </button>
+
+                    )
+                  )}
+
+                </div>
+
+              )}
+
+              {/* NEXT BUTTON BELOW */}
+
+              {galleryImages.length >
+                1 && (
+
+                <div className="mt-6 flex justify-center">
+
+                  <button
+                    type="button"
+                    onClick={
+                      nextGalleryImage
+                    }
+                    className="inline-flex items-center gap-2 text-sm font-bold text-[#0d58ad] hover:gap-3 transition-all"
+                  >
+
+                    Next Photo
+
+                    <ArrowRight className="w-4 h-4" />
+
+                  </button>
+
+                </div>
+
+              )}
+
+            </section>
+
+          )}
+
+          {/* ============================================
+              TAGS
+          ============================================ */}
+
+          {Array.isArray(
+            story.tags
+          ) &&
+            story.tags.length > 0 && (
+
+              <div className="mt-12 pt-7 border-t border-slate-200">
+
+                <div className="flex items-center gap-2 mb-4">
+
+                  <Tag className="w-4 h-4 text-[#0d58ad]" />
+
+                  <span className="text-sm font-bold text-slate-700">
+                    Tags
+                  </span>
+
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+
+                  {story.tags.map(
+                    (
+                      tag,
+                      index
+                    ) => (
+
+                      <span
+                        key={`${tag}-${index}`}
+                        className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold"
+                      >
+
+                        #{tag}
+
+                      </span>
+
+                    )
+                  )}
+
+                </div>
+
+              </div>
+
+            )}
+
+          {/* ============================================
+              BOTTOM ACTIONS
+          ============================================ */}
+
+          <div className="mt-14 pt-8 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+
+            <button
+              type="button"
+              onClick={() =>
+                navigate(
+                  "/news-features"
+                )
+              }
+              className="inline-flex items-center gap-2 text-sm font-bold text-[#0d58ad] hover:gap-3 transition-all"
+            >
+
+              <ArrowLeft className="w-4 h-4" />
+
+              More News & Features
+
+            </button>
+
+            <button
+              type="button"
+              onClick={
+                handleShare
+              }
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-100 text-slate-700 text-sm font-bold hover:bg-slate-200 transition"
+            >
+
+              <Share2 className="w-4 h-4" />
+
+              Share Article
+
+            </button>
+
+          </div>
+
+        </article>
+
+        {/* ============================================
+            OTHER STORIES
+        ============================================ */}
+
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-24">
+
+          <div className="border-t border-slate-200 pt-12">
+
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+
+              <div>
+
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#0d58ad]">
+                  Keep Reading
+                </p>
+
+                <h2 className="mt-3 text-3xl sm:text-4xl font-black text-[#243f57]">
+                  Other Stories
+                </h2>
+
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(
+                    "/news-features"
+                  )
+                }
+                className="inline-flex items-center gap-2 text-sm font-bold text-[#0d58ad] hover:gap-3 transition-all"
+              >
+
+                View All Stories
+
+                <ArrowRight className="w-4 h-4" />
+
+              </button>
+
+            </div>
+
+            {relatedLoading ? (
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                {[1, 2, 3].map(
+                  (item) => (
+
+                    <div
+                      key={item}
+                      className="animate-pulse"
+                    >
+
+                      <div className="aspect-[16/10] bg-slate-200 rounded-2xl" />
+
+                      <div className="mt-5 h-4 bg-slate-200 rounded w-24" />
+
+                      <div className="mt-4 h-7 bg-slate-200 rounded w-full" />
+
+                      <div className="mt-3 h-4 bg-slate-200 rounded w-4/5" />
+
+                    </div>
+
+                  )
+                )}
+
+              </div>
+
+            ) : relatedStories.length >
+              0 ? (
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                {relatedStories.map(
+                  (
+                    relatedStory
+                  ) => (
+
+                    <article
+                      key={
+                        relatedStory.id
+                      }
+                      onClick={() =>
+                        openRelatedStory(
+                          relatedStory.id
+                        )
+                      }
+                      className="group cursor-pointer"
+                    >
+
+                      {/* IMAGE */}
+
+                      <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-slate-100">
+
+                        {relatedStory.image ? (
+
+                          <img
+                            src={
+                              relatedStory.image
+                            }
+                            alt={
+                              relatedStory.title
+                            }
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            loading="lazy"
+                          />
+
+                        ) : (
+
+                          <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">
+                            No image
+                          </div>
+
+                        )}
+
+                      </div>
+
+                      {/* CONTENT */}
+
+                      <div className="pt-5">
+
+                        <span className="text-xs font-black uppercase tracking-[0.16em] text-[#0d58ad]">
+
+                          {relatedStory.category ||
+                            relatedStory.label ||
+                            "News"}
+
+                        </span>
+
+                        <h3 className="mt-3 text-xl sm:text-2xl font-bold leading-tight text-[#243f57] group-hover:text-[#0d58ad] transition-colors">
+
+                          {
+                            relatedStory.title
+                          }
+
+                        </h3>
+
+                        <p className="mt-3 text-sm sm:text-base text-slate-600 leading-7 line-clamp-2">
+
+                          {relatedStory.shortArticle ||
+                            relatedStory.description ||
+                            "Read this story for more information."}
+
+                        </p>
+
+                        <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
+
+                          <Calendar className="w-3.5 h-3.5" />
+
+                          {relatedStory.date ||
+                            "No date"}
+
+                        </div>
+
+                        <div className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-[#0d58ad] group-hover:gap-3 transition-all">
+
+                          Read Story
+
+                          <ArrowRight className="w-4 h-4" />
+
+                        </div>
+
+                      </div>
+
+                    </article>
+
+                  )
+                )}
+
+              </div>
+
+            ) : (
+
+              <div className="py-12 text-center border-y border-slate-200">
+
+                <p className="text-slate-500">
+                  No other stories available.
+                </p>
+
+              </div>
+
+            )}
+
+          </div>
+
         </section>
 
-        <HelpfulSection />
       </main>
 
       <Footer />
+
     </div>
   );
 }
